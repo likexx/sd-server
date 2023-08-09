@@ -20,7 +20,8 @@ def initConfig():
     return args
 
 
-def txt2img(prompts):
+def txt2img(prompt):
+    prompts = [prompt]
     images = pipeline(prompts, num_inference_steps=10).images
     result = []
     for img in images:
