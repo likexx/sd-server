@@ -17,6 +17,8 @@ pipeline = None
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
 STEPS = 50
+HEIGHT=256
+WIDTH=256
 
 def initConfig():
     parser = argparse.ArgumentParser()
@@ -30,7 +32,7 @@ def initConfig():
 
 def txt2img(prompt):
     global pipeline
-    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=STEPS).images
+    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=STEPS, height=HEIGHT, width=WIDTH).images
     result = []
     for img in images:
         buffered = BytesIO()
