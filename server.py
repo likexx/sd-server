@@ -5,10 +5,18 @@ from io import BytesIO
 import argparse
 
 from diffusers import StableDiffusionPipeline
+from diffusers.pipelines.stable_diffusion import safety_checker
+
+def sc(self, clip_input, images) :
+    return images, [False for i in images]
+
+# edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
+safety_checker.StableDiffusionSafetyChecker.forward = sc
 
 pipeline = None
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
+STEPS = 50
 
 def initConfig():
     parser = argparse.ArgumentParser()
@@ -22,7 +30,7 @@ def initConfig():
 
 def txt2img(prompt):
     global pipeline
-    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=20).images
+    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=STEPS).images
     result = []
     for img in images:
         buffered = BytesIO()
@@ -44,9 +52,9 @@ def init():
     print("model: {}\nlora:{}".format(model, loraPath))
     # pipeline = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", revision="fp16", torch_dtype=torch.float16)
     if model.endswith('.safetensors') or model.endswith('.ckpt'):
-        pipeline = StableDiffusionPipeline.from_single_file(model)
+        pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
     else:
-        pipeline = StableDiffusionPipeline.from_pretrained(model, revision="fp16", torch_dtype=torch.float16)
+        pipeline = StableDiffusionPipeline.from_pretrained(model, revision="fp16", torch_dtype=torch.float16, safety_checker = None, requires_safety_checker = False)
     
     if conf.lora != '':
         pipeline.unet.load_attn_procs(conf.lora)
