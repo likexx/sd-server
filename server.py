@@ -16,15 +16,17 @@ safety_checker.StableDiffusionSafetyChecker.forward = sc
 pipeline = None
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
-STEPS = 50
+STEPS = 100
 HEIGHT=256
 WIDTH=256
+STEPS = 50
 
 def initConfig():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, required=True, help='base model path or name on huggingface')
     parser.add_argument('--lora', type=str, default='', help='lora location')
     parser.add_argument('--token', type=str, default="123456", help='server token')
+    parser.add_argument('--steps', type=int, default=50, help='steps')
     # Parse the arguments
     args = parser.parse_args()
     return args
@@ -32,7 +34,11 @@ def initConfig():
 
 def txt2img(prompt):
     global pipeline
-    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=STEPS, height=HEIGHT, width=WIDTH).images
+    images = pipeline(prompt, 
+                      num_images_per_prompt=NUM_OF_IMAGES, 
+                      num_inference_steps=STEPS, 
+                      height=HEIGHT, 
+                      width=WIDTH).images
     result = []
     for img in images:
         buffered = BytesIO()
@@ -44,11 +50,13 @@ def txt2img(prompt):
 
 
 def init():
-    global pipeline, SERVER_TOKEN
+    global pipeline, SERVER_TOKEN, STEPS
     conf = initConfig()
     if conf.token != '':
         SERVER_TOKEN = conf.token
-
+    
+    STEPS = conf.steps
+    
     model = conf.model
     loraPath = conf.lora    
     print("model: {}\nlora:{}".format(model, loraPath))
@@ -58,8 +66,11 @@ def init():
     else:
         pipeline = StableDiffusionPipeline.from_pretrained(model, revision="fp16", torch_dtype=torch.float16, safety_checker = None, requires_safety_checker = False)
     
-    if conf.lora != '':
-        pipeline.unet.load_attn_procs(conf.lora)
+    if loraPath != '':
+        if loraPath.endswith('.safetensors'):
+            pipeline.load_lora_weights(".", weight_name=loraPath)
+        else:
+            pipeline.unet.load_attn_procs(conf.lora)
 
     pipeline.to("cuda")
 
