@@ -21,6 +21,7 @@ def initConfig():
 
 
 def txt2img(prompt):
+    global pipeline
     images = pipeline(prompt, num_images_per_prompt=4, num_inference_steps=10).images
     result = []
     for img in images:
@@ -33,6 +34,7 @@ def txt2img(prompt):
 
 
 def init():
+    global pipeline, SERVER_TOKEN
     conf = initConfig()
     if conf.token != '':
         SERVER_TOKEN = conf.token
