@@ -8,7 +8,7 @@ from diffusers import StableDiffusionPipeline
 
 pipeline = None
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
-
+NUM_OF_IMAGES = 4
 
 def initConfig():
     parser = argparse.ArgumentParser()
@@ -22,7 +22,7 @@ def initConfig():
 
 def txt2img(prompt):
     global pipeline
-    images = pipeline(prompt, num_images_per_prompt=4, num_inference_steps=10).images
+    images = pipeline(prompt, num_images_per_prompt=NUM_OF_IMAGES, num_inference_steps=20).images
     result = []
     for img in images:
         buffered = BytesIO()
@@ -41,6 +41,7 @@ def init():
 
     model = conf.model
     loraPath = conf.lora    
+    print("model: {}\nlora:{}".format(model, loraPath))
     # pipeline = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", revision="fp16", torch_dtype=torch.float16)
     if model.endswith('.safetensors') or model.endswith('.ckpt'):
         pipeline = StableDiffusionPipeline.from_single_file(model)
@@ -76,6 +77,5 @@ app.add_routes(routes)
 
 if __name__ == '__main__':
     init()
-
 
     web.run_app(app, port=8085)
