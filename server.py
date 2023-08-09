@@ -21,8 +21,7 @@ def initConfig():
 
 
 def txt2img(prompt):
-    prompts = [prompt]
-    images = pipeline(prompts, num_inference_steps=10).images
+    images = pipeline(prompt, num_images_per_prompt=4, num_inference_steps=10).images
     result = []
     for img in images:
         buffered = BytesIO()
