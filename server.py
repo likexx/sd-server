@@ -5,6 +5,7 @@ from io import BytesIO
 import argparse
 
 from diffusers import StableDiffusionPipeline
+from diffusers import DiffusionPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
 
 def sc(self, clip_input, images) :
@@ -71,7 +72,20 @@ def init():
     if model.endswith('.safetensors') or model.endswith('.ckpt'):
         pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
     else:
-        pipeline = StableDiffusionPipeline.from_pretrained(model, revision="fp16", torch_dtype=torch.float16, safety_checker = None, requires_safety_checker = False)
+        if model=='sdxl':
+            pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+                                                         torch_dtype=torch.float16, 
+                                                         use_safetensors=True, 
+                                                         variant="fp16", 
+                                                         safety_checker = None, 
+                                                         requires_safety_checker = False
+                                                         )
+        else:
+            pipeline = StableDiffusionPipeline.from_pretrained(model, 
+                                                               revision="fp16", 
+                                                               torch_dtype=torch.float16, 
+                                                               safety_checker = None, 
+                                                               requires_safety_checker = False)
 
     if loraPath != '':
         if loraPath.endswith('.safetensors'):
