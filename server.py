@@ -20,7 +20,6 @@ img2imgPipeline = None
 
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
-STEPS = 100
 HEIGHT=480
 WIDTH=480
 STEPS = 50
@@ -109,8 +108,8 @@ def generate(prompt,
     if not image:
         images = pipeline(prompt,
                         negative_prompt=NEGATIVE_PROMPT,
-                        num_images_per_prompt=NUM_OF_IMAGES,
-                        num_inference_steps=STEPS,
+                        num_images_per_prompt=numImages,
+                        num_inference_steps=steps,
                         height=HEIGHT,
                         width=WIDTH).images
     else:
@@ -119,8 +118,8 @@ def generate(prompt,
         images = img2imgPipeline(prompt,
                                 image=init_image,
                                 negative_prompt=NEGATIVE_PROMPT,
-                                num_images_per_prompt=NUM_OF_IMAGES,
-                                num_inference_steps=STEPS,
+                                num_images_per_prompt=numImages,
+                                num_inference_steps=steps,
                                 ).images
     result = []
     for img in images:
@@ -164,6 +163,16 @@ async def img_to_image_handle(request):
     image = post.get("image_data")
     num_images = post.get("number_images")
     steps = post.get("steps")
+
+    if num_images != '':
+        num_images = int(num_images)
+    else:
+        num_images = NUM_OF_IMAGES
+
+    if steps != '':
+        steps = int(steps)
+    else:
+        steps = STEPS
     
     data = generate(prompt=prompt, negPrompt=negPrompt, image=image, steps=steps, numImages=num_images)
     return web.json_response({'result': data})
