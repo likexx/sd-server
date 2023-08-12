@@ -121,8 +121,7 @@ def generate(prompt,
                                 negative_prompt=NEGATIVE_PROMPT,
                                 num_images_per_prompt=NUM_OF_IMAGES,
                                 num_inference_steps=STEPS,
-                                height=HEIGHT,
-                                width=WIDTH).images
+                                ).images
     result = []
     for img in images:
         buffered = BytesIO()
