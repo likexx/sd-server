@@ -164,12 +164,12 @@ async def img_to_image_handle(request):
     num_images = post.get("number_images")
     steps = post.get("steps")
 
-    if num_images != '':
+    if num_images:
         num_images = int(num_images)
     else:
         num_images = NUM_OF_IMAGES
 
-    if steps != '':
+    if steps:
         steps = int(steps)
     else:
         steps = STEPS
