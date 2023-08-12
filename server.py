@@ -3,8 +3,9 @@ import torch
 import base64, os
 from io import BytesIO
 import argparse
+from PIL import Image
 
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
 from diffusers import DiffusionPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
 
@@ -15,6 +16,8 @@ def sc(self, clip_input, images) :
 safety_checker.StableDiffusionSafetyChecker.forward = sc
 
 pipeline = None
+img2imgPipeline = None
+
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
 STEPS = 100
@@ -36,27 +39,8 @@ def initConfig():
     return args
 
 
-
-def txt2img(prompt):
-    global pipeline
-    images = pipeline(prompt,
-                      negative_prompt=NEGATIVE_PROMPT,
-                      num_images_per_prompt=NUM_OF_IMAGES,
-                      num_inference_steps=STEPS,
-                      height=HEIGHT,
-                      width=WIDTH).images
-    result = []
-    for img in images:
-        buffered = BytesIO()
-        img.save(buffered, format="JPEG")
-        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-        result.append({'base64_str': base64_str})
-    # print(base64_str)
-    return result
-
-
 def init():
-    global pipeline, SERVER_TOKEN, STEPS, WIDTH, HEIGHT
+    global pipeline, img2imgPipeline, SERVER_TOKEN, STEPS, WIDTH, HEIGHT
     conf = initConfig()
     if conf.token != '':
         SERVER_TOKEN = conf.token
@@ -87,6 +71,9 @@ def init():
                                                                safety_checker = None, 
                                                                requires_safety_checker = False)
 
+    components = pipeline.components
+    img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)
+
     if loraPath != '':
         if loraPath.endswith('.safetensors'):
             print("load lora weights")
@@ -96,6 +83,54 @@ def init():
 
     pipeline.to("cuda")
 
+
+def base64_to_rgb_image(base64_data):
+    # Decode the base64 data
+    decoded_data = base64.b64decode(base64_data)
+    
+    # Convert the decoded data to an image
+    img_buffer = BytesIO(decoded_data)
+    img = Image.open(img_buffer)
+    
+    # Convert to RGB
+    rgb_img = img.convert('RGB')
+    
+    return rgb_img
+
+
+def generate(prompt, 
+            negPrompt = NEGATIVE_PROMPT, 
+            image=None, 
+            steps=50,
+            numImages=NUM_OF_IMAGES
+            ):
+    global pipeline, img2imgPipeline
+
+    if not image:
+        images = pipeline(prompt,
+                        negative_prompt=NEGATIVE_PROMPT,
+                        num_images_per_prompt=NUM_OF_IMAGES,
+                        num_inference_steps=STEPS,
+                        height=HEIGHT,
+                        width=WIDTH).images
+    else:
+        init_image = base64_to_rgb_image(image)
+        init_image = init_image.resize((WIDTH, HEIGHT))
+        images = img2imgPipeline(prompt,
+                                image=init_image,
+                                negative_prompt=NEGATIVE_PROMPT,
+                                num_images_per_prompt=NUM_OF_IMAGES,
+                                num_inference_steps=STEPS,
+                                height=HEIGHT,
+                                width=WIDTH).images
+    result = []
+    for img in images:
+        buffered = BytesIO()
+        img.save(buffered, format="JPEG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        result.append({'base64_str': base64_str})
+    # print(base64_str)
+    return result
 
 routes = web.RouteTableDef()
 
@@ -108,11 +143,30 @@ async def handle(request):
 @routes.post('/txt2image')
 async def text_to_image_handle(request):
     post = await request.json()
-    prompt = post.get("prompt")
     if post.get('token') != SERVER_TOKEN:
         return web.json_response({'result': "invalid token"})
 
-    data = txt2img(prompt)
+    prompt = post.get("prompt")
+    negPrompt = post.get("neg_prompt")
+    num_images = post.get("number_images")
+    steps = post.get("steps")
+    
+    data = generate(prompt=prompt, negPrompt=negPrompt, steps=steps, numImages=num_images)
+    return web.json_response({'result': data})
+
+@routes.post('/img2image')
+async def img_to_image_handle(request):
+    post = await request.json()
+    if post.get('token') != SERVER_TOKEN:
+        return web.json_response({'result': "invalid token"})
+
+    prompt = post.get("prompt")
+    negPrompt = post.get("neg_prompt")
+    image = post.get("image_data")
+    num_images = post.get("number_images")
+    steps = post.get("steps")
+    
+    data = generate(prompt=prompt, negPrompt=negPrompt, image=image, steps=steps, numImages=num_images)
     return web.json_response({'result': data})
 
 app = web.Application()
