@@ -30,7 +30,7 @@ def add_watermark(input_image, watermark_text):
     width, height = image.size
 
     # Position the watermark
-    text_width, text_height = 30, 30
+    text_width, text_height = 20, 20
     x = 10  # 10 pixels padding
     y = height - text_height - 10
 
@@ -38,4 +38,4 @@ def add_watermark(input_image, watermark_text):
     d.text((x, y), watermark_text, fill=(255, 255, 255, 255), font=font, stroke_fill=(3,3,3,128), stroke_width=1)
     watermarked = Image.alpha_composite(image.convert('RGBA'), transparent)
 
-    return watermarked
+    return watermarked.convert('RGB')
