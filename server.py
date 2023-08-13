@@ -3,7 +3,7 @@ import torch
 import base64, os
 from io import BytesIO
 import argparse
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
 from diffusers import DiffusionPipeline
@@ -97,6 +97,39 @@ def base64_to_rgb_image(base64_data):
     return rgb_img
 
 
+
+def add_watermark(input_image, watermark_text, font_scale = 2):
+    # Make a copy of the input image to ensure original isn't altered
+    image = input_image.copy()
+
+    # Prepare to draw the watermark with default font
+    transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
+    d = ImageDraw.Draw(transparent)
+    font = ImageFont.load_default()
+
+    # Get image size
+    width, height = image.size
+
+    # Calculate text size and scale it
+    text_width, text_height = d.textsize(watermark_text, font=font)
+    text_width *= font_scale
+    text_height *= font_scale
+
+    # Position the watermark
+    x = width - text_width - 10  # 10 pixels padding
+    y = height - text_height - 10
+
+    # Draw the watermark using an intermediate image to scale the text
+    text_image = Image.new('RGBA', (text_width, text_height), (255, 255, 255, 0))
+    text_draw = ImageDraw.Draw(text_image)
+    text_draw.text((0, 0), watermark_text, fill=(255, 255, 255, 128), font=font)
+    scaled_text = text_image.resize((text_width, text_height), Image.LANCZOS)
+    transparent.paste(scaled_text, (x, y), scaled_text)
+
+    watermarked = Image.alpha_composite(image.convert('RGBA'), transparent)
+    return watermarked
+
+
 def generate(prompt, 
             negPrompt = NEGATIVE_PROMPT, 
             image=None, 
@@ -123,6 +156,7 @@ def generate(prompt,
                                 ).images
     result = []
     for img in images:
+        finalImage = add_watermark(img, "Created by KK Studio", 2)
         buffered = BytesIO()
         img.save(buffered, format="JPEG")
         base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
