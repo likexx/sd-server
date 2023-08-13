@@ -112,7 +112,7 @@ def add_watermark(input_image, watermark_text):
     width, height = image.size
 
     # Position the watermark
-    text_width, text_height = d.textsize(watermark_text, font)
+    text_width, text_height = 30, 30
     x = width - text_width - 10  # 10 pixels padding
     y = height - text_height - 10
 
