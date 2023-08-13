@@ -18,6 +18,8 @@ safety_checker.StableDiffusionSafetyChecker.forward = sc
 pipeline = None
 img2imgPipeline = None
 
+WATERMARK_FONT = ImageFont.truetype("Arial.ttf", 30)
+
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
 NUM_OF_IMAGES = 4
 HEIGHT=480
@@ -105,8 +107,7 @@ def add_watermark(input_image, watermark_text):
     # Prepare to draw the watermark with default font
     transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
     d = ImageDraw.Draw(transparent)
-    font = ImageFont.truetype("Arial.ttf", 30)
-
+    font = WATERMARK_FONT
     # Get image size
     width, height = image.size
 
@@ -148,9 +149,9 @@ def generate(prompt,
                                 ).images
     result = []
     for img in images:
-        finalImage = add_watermark(img, "Created by KK Studio", 2)
+        finalImage = add_watermark(img, "Created by KK Studio")
         buffered = BytesIO()
-        img.save(buffered, format="JPEG")
+        finalImage.save(buffered, format="JPEG")
         base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
         result.append({'base64_str': base64_str})
     # print(base64_str)
