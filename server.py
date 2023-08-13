@@ -4,6 +4,7 @@ import base64, os
 from io import BytesIO
 import argparse
 from PIL import Image, ImageDraw, ImageFont
+import img_util as imgUtil
 
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
 from diffusers import DiffusionPipeline
@@ -84,45 +85,6 @@ def init():
 
     pipeline.to("cuda")
 
-
-def base64_to_rgb_image(base64_data):
-    # Decode the base64 data
-    decoded_data = base64.b64decode(base64_data)
-    
-    # Convert the decoded data to an image
-    img_buffer = BytesIO(decoded_data)
-    img = Image.open(img_buffer)
-    
-    # Convert to RGB
-    rgb_img = img.convert('RGB')
-    
-    return rgb_img
-
-
-
-def add_watermark(input_image, watermark_text):
-    # Make a copy of the input image to ensure original isn't altered
-    image = input_image.copy()
-
-    # Prepare to draw the watermark with default font
-    transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
-    d = ImageDraw.Draw(transparent)
-    font = WATERMARK_FONT
-    # Get image size
-    width, height = image.size
-
-    # Position the watermark
-    text_width, text_height = 30, 30
-    x = width - text_width - 10  # 10 pixels padding
-    y = height - text_height - 10
-
-    # Draw the watermark using an intermediate image to scale the text
-    d.text((x, y), watermark_text, fill=(255, 255, 255, 128), font=font)
-    watermarked = Image.alpha_composite(image.convert('RGBA'), transparent)
-
-    return watermarked
-
-
 def generate(prompt, 
             negPrompt = NEGATIVE_PROMPT, 
             image=None, 
@@ -139,7 +101,7 @@ def generate(prompt,
                         height=HEIGHT,
                         width=WIDTH).images
     else:
-        init_image = base64_to_rgb_image(image)
+        init_image = imgUtil.base64_to_rgb_image(image)
         init_image = init_image.resize((WIDTH, HEIGHT))
         images = img2imgPipeline(prompt,
                                 image=init_image,
@@ -149,7 +111,7 @@ def generate(prompt,
                                 ).images
     result = []
     for img in images:
-        finalImage = add_watermark(img, "Created by KK Studio")
+        finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
         buffered = BytesIO()
         finalImage.save(buffered, format="JPEG")
         base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
