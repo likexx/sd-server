@@ -105,7 +105,7 @@ def add_watermark(input_image, watermark_text, font_scale = 2):
     # Prepare to draw the watermark with default font
     transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
     d = ImageDraw.Draw(transparent)
-    font = ImageFont.load_default()
+    font = ImageFont.load('Arial.ttf')
 
     # Get image size
     width, height = image.size
