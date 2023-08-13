@@ -98,35 +98,27 @@ def base64_to_rgb_image(base64_data):
 
 
 
-def add_watermark(input_image, watermark_text, font_scale = 2):
+def add_watermark(input_image, watermark_text):
     # Make a copy of the input image to ensure original isn't altered
     image = input_image.copy()
 
     # Prepare to draw the watermark with default font
     transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
     d = ImageDraw.Draw(transparent)
-    font = ImageFont.load('Arial.ttf')
+    font = ImageFont.truetype("Arial.ttf", 30)
 
     # Get image size
     width, height = image.size
 
-    # Calculate text size and scale it
-    text_width, text_height = d.textsize(watermark_text, font=font)
-    text_width *= font_scale
-    text_height *= font_scale
-
     # Position the watermark
+    text_width, text_height = d.textsize(watermark_text, font)
     x = width - text_width - 10  # 10 pixels padding
     y = height - text_height - 10
 
     # Draw the watermark using an intermediate image to scale the text
-    text_image = Image.new('RGBA', (text_width, text_height), (255, 255, 255, 0))
-    text_draw = ImageDraw.Draw(text_image)
-    text_draw.text((0, 0), watermark_text, fill=(255, 255, 255, 128), font=font)
-    scaled_text = text_image.resize((text_width, text_height), Image.LANCZOS)
-    transparent.paste(scaled_text, (x, y), scaled_text)
-
+    d.text((x, y), watermark_text, fill=(255, 255, 255, 128), font=font)
     watermarked = Image.alpha_composite(image.convert('RGBA'), transparent)
+
     return watermarked
 
 
