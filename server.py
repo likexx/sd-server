@@ -211,9 +211,9 @@ def aigcJobThread():
                     'bucket': aigcBucketName,
                     'image_file': aigcFilename
                 })
-                updateResult = consumer.updateJobResult(jobId=jobId, result=json.dumps(result))
-                print("job result saved", updateResult, jobId, result)
-                print("****************job done:", jobId)
+            updateResult = consumer.updateJobResult(jobId=jobId, result=json.dumps(result))
+            print("job result saved", updateResult, jobId, result)
+            print("****************job done:", jobId)
             
             time.sleep(5)
 
