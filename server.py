@@ -137,6 +137,16 @@ async def text_to_image_handle(request):
     negPrompt = post.get("neg_prompt")
     num_images = post.get("number_images")
     steps = post.get("steps")
+
+    if num_images:
+        num_images = int(num_images)
+    else:
+        num_images = NUM_OF_IMAGES
+
+    if steps:
+        steps = int(steps)
+    else:
+        steps = STEPS
     
     data = generate(prompt=prompt, negPrompt=negPrompt, steps=steps, numImages=num_images)
     return web.json_response({'result': data})
@@ -172,4 +182,5 @@ app.add_routes(routes)
 if __name__ == '__main__':
     init()
 
-    web.run_app(app, port=8085)
+
+    # web.run_app(app, port=8085)

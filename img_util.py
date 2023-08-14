@@ -2,8 +2,6 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 import base64
 
-WATERMARK_FONT = ImageFont.truetype("Arial.ttf", 30)
-
 def base64_to_rgb_image(base64_data):
     # Decode the base64 data
     decoded_data = base64.b64decode(base64_data)
@@ -21,16 +19,18 @@ def base64_to_rgb_image(base64_data):
 def add_watermark(input_image, watermark_text):
     # Make a copy of the input image to ensure original isn't altered
     image = input_image.copy()
+    # Get image size
+    width, height = image.size
+
+    textSize = width/30
 
     # Prepare to draw the watermark with default font
     transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
     d = ImageDraw.Draw(transparent)
-    font = WATERMARK_FONT
-    # Get image size
-    width, height = image.size
+    font = ImageFont.truetype("Arial.ttf", textSize)
 
     # Position the watermark
-    text_width, text_height = 20, 20
+    text_width, text_height = textSize, textSize
     x = 10  # 10 pixels padding
     y = height - text_height - 10
 
