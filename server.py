@@ -184,11 +184,13 @@ def aigcJobThread():
         job = consumer.getNextAvailableJob()
         if job:
             jobId = job['job_id']
-            jobConfigStr = job['job_config']
-            config = json.loads(jobConfigStr)
-            imagefile = config['image_file']
-            bucketName = config['bucket']
-            imageData = bucket.read_file_from_bucket(bucket_name=bucketName, blob_name=imagefile)
+            config = job['job_config']
+            # config = json.loads(jobConfigStr)
+            imagefile = config.get('image_file', "")
+            bucketName = config.get('bucket', "")
+            imageData = ""
+            if imagefile and bucketName:
+                imageData = bucket.read_file_from_bucket(bucket_name=bucketName, blob_name=imagefile)
             prompt = config.get('prompt', '')
             negPrompt = config.get('negative_prompt', '')
             steps = config.get('steps', 50)
