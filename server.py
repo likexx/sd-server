@@ -21,6 +21,8 @@ safety_checker.StableDiffusionSafetyChecker.forward = sc
 pipeline = None
 img2imgPipeline = None
 
+pipeline_lock = threading.Lock()
+
 WATERMARK_FONT = ImageFont.truetype("Arial.ttf", 30)
 
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
@@ -93,34 +95,35 @@ def generate(prompt,
             steps=50,
             numImages=NUM_OF_IMAGES
             ):
-    global pipeline, img2imgPipeline
+    global pipeline, img2imgPipeline, pipeline_lock
 
-    if not image:
-        images = pipeline(prompt,
-                        negative_prompt=NEGATIVE_PROMPT,
-                        num_images_per_prompt=numImages,
-                        num_inference_steps=steps,
-                        height=HEIGHT,
-                        width=WIDTH).images
-    else:
-        init_image = imgUtil.base64_to_rgb_image(image)
-        init_image = init_image.resize((WIDTH, HEIGHT))
-        images = img2imgPipeline(prompt,
-                                image=init_image,
-                                negative_prompt=NEGATIVE_PROMPT,
-                                num_images_per_prompt=numImages,
-                                num_inference_steps=steps,
-                                ).images
-    result = []
-    for img in images:
-        buffered = BytesIO()
-        # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
-        img.save(buffered, format="JPEG")
-        # finalImage.save(buffered, format="JPEG")
-        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-        result.append({'base64_str': base64_str})
-    # print(base64_str)
-    return result
+    with pipeline_lock:
+        if not image:
+            images = pipeline(prompt,
+                            negative_prompt=NEGATIVE_PROMPT,
+                            num_images_per_prompt=numImages,
+                            num_inference_steps=steps,
+                            height=HEIGHT,
+                            width=WIDTH).images
+        else:
+            init_image = imgUtil.base64_to_rgb_image(image)
+            init_image = init_image.resize((WIDTH, HEIGHT))
+            images = img2imgPipeline(prompt,
+                                    image=init_image,
+                                    negative_prompt=NEGATIVE_PROMPT,
+                                    num_images_per_prompt=numImages,
+                                    num_inference_steps=steps,
+                                    ).images
+        result = []
+        for img in images:
+            buffered = BytesIO()
+            # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
+            img.save(buffered, format="JPEG")
+            # finalImage.save(buffered, format="JPEG")
+            base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            result.append({'base64_str': base64_str})
+        # print(base64_str)
+        return result
 
 routes = web.RouteTableDef()
 
