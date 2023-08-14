@@ -97,6 +97,7 @@ def generate(prompt,
             ):
     global pipeline, img2imgPipeline, pipeline_lock
 
+    result = []
     with pipeline_lock:
         if not image:
             images = pipeline(prompt,
@@ -114,7 +115,6 @@ def generate(prompt,
                                     num_images_per_prompt=numImages,
                                     num_inference_steps=steps,
                                     ).images
-        result = []
         for img in images:
             buffered = BytesIO()
             # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
@@ -123,7 +123,7 @@ def generate(prompt,
             base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
             result.append({'base64_str': base64_str})
         # print(base64_str)
-        return result
+    return result
 
 routes = web.RouteTableDef()
 
@@ -213,6 +213,7 @@ def aigcJobThread():
                 })
                 updateResult = consumer.updateJobResult(jobId=jobId, result=json.dumps(result))
                 print("job result saved", updateResult, jobId, result)
+                print("****************job done:", jobId)
             
             time.sleep(5)
 
