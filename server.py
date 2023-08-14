@@ -111,9 +111,10 @@ def generate(prompt,
                                 ).images
     result = []
     for img in images:
-        finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
         buffered = BytesIO()
-        finalImage.save(buffered, format="JPEG")
+        # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
+        img.save(buffered, format="JPEG")
+        # finalImage.save(buffered, format="JPEG")
         base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
         result.append({'base64_str': base64_str})
     # print(base64_str)
@@ -181,6 +182,4 @@ app.add_routes(routes)
 
 if __name__ == '__main__':
     init()
-
-
-    # web.run_app(app, port=8085)
+    web.run_app(app, port=8085)
