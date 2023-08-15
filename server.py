@@ -184,38 +184,42 @@ async def img_to_image_handle(request):
 
 def aigcJobThread():
     while True:
-        job = consumer.getNextAvailableJob()
-        if job:
-            jobId = job['job_id']
-            config = job['job_config']
-            # config = json.loads(jobConfigStr)
-            imagefile = config.get('image_file', "")
-            bucketName = config.get('bucket', "")
-            imageData = ""
-            if imagefile and bucketName:
-                imageData = bucket.read_file_from_bucket(bucket_name=bucketName, blob_name=imagefile)
-            prompt = config.get('prompt', '')
-            negPrompt = config.get('negative_prompt', '')
-            steps = config.get('steps', 50)
-            numImages = config.get('num_images', 8)
-            size = config.get('size', 360)
+        try:
+            job = consumer.getNextAvailableJob()
+            if job:
+                jobId = job['job_id']
+                config = job['job_config']
+                # config = json.loads(jobConfigStr)
+                imagefile = config.get('image_file', "")
+                bucketName = config.get('bucket', "")
+                imageData = ""
+                if imagefile and bucketName:
+                    imageData = bucket.read_file_from_bucket(bucket_name=bucketName, blob_name=imagefile)
+                prompt = config.get('prompt', '')
+                negPrompt = config.get('negative_prompt', '')
+                steps = config.get('steps', 50)
+                numImages = config.get('num_images', 8)
+                size = config.get('size', 360)
+                
+                images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
+                result = []
+                for image in images:
+                    d = image['base64_str']
+                    aigcBucketName = bucket.aigc_img_bucket_name
+                    aigcFilename = jobId + '-' + str(uuid.uuid4()).replace('-', '')
+                    bucket.upload_to_bucket(d, aigcBucketName, aigcFilename)
+                    result.append({
+                        'bucket': aigcBucketName,
+                        'image_file': aigcFilename
+                    })
+                updateResult = consumer.updateJobResult(jobId=jobId, result=json.dumps(result))
+                print("job result saved", updateResult, jobId, result)
+                print("****************job done:", jobId)
+
+        except Exception as e:
+            print(e)
             
-            images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
-            result = []
-            for image in images:
-                d = image['base64_str']
-                aigcBucketName = bucket.aigc_img_bucket_name
-                aigcFilename = jobId + '-' + str(uuid.uuid4()).replace('-', '')
-                bucket.upload_to_bucket(d, aigcBucketName, aigcFilename)
-                result.append({
-                    'bucket': aigcBucketName,
-                    'image_file': aigcFilename
-                })
-            updateResult = consumer.updateJobResult(jobId=jobId, result=json.dumps(result))
-            print("job result saved", updateResult, jobId, result)
-            print("****************job done:", jobId)
-            
-            time.sleep(5)
+        time.sleep(5)
 
 
 app = web.Application()
