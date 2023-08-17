@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 import img_util as imgUtil
 
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
-from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline
+from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, DiffusionPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
 import consumer
 import gcloud_bucket as bucket
@@ -63,15 +63,23 @@ def init():
         pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
     else:
         if model=='sdxl':
-            pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+            pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
                                                          torch_dtype=torch.float16, 
                                                          use_safetensors=True, 
                                                          variant="fp16", 
                                                          safety_checker = None, 
                                                          requires_safety_checker = False
                                                          )
-            components = pipeline.components
-            img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
+            
+            # pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+            #                                              torch_dtype=torch.float16, 
+            #                                              use_safetensors=True, 
+            #                                              variant="fp16", 
+            #                                              safety_checker = None, 
+            #                                              requires_safety_checker = False
+            #                                              )
+            # components = pipeline.components
+            # img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
         else:
             pipeline = StableDiffusionPipeline.from_pretrained(model, 
                                                                revision="fp16", 
@@ -100,7 +108,7 @@ def generate(prompt,
 
     result = []
     with pipeline_lock:
-        if not image:
+        if not image or not img2imgPipeline:
             images = pipeline(prompt,
                             negative_prompt=NEGATIVE_PROMPT,
                             num_images_per_prompt=numImages,
