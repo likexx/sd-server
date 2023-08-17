@@ -63,23 +63,15 @@ def init():
         pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
     else:
         if model=='sdxl':
-            pipeline = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+            pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
                                                          torch_dtype=torch.float16, 
                                                          use_safetensors=True, 
                                                          variant="fp16", 
                                                          safety_checker = None, 
                                                          requires_safety_checker = False
                                                          )
-            
-            # pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
-            #                                              torch_dtype=torch.float16, 
-            #                                              use_safetensors=True, 
-            #                                              variant="fp16", 
-            #                                              safety_checker = None, 
-            #                                              requires_safety_checker = False
-            #                                              )
-            # components = pipeline.components
-            # img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
+            components = pipeline.components
+            img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
         else:
             pipeline = StableDiffusionPipeline.from_pretrained(model, 
                                                                revision="fp16", 
