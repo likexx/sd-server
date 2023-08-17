@@ -17,12 +17,12 @@ def getNextAvailableJob():
     return response['data']
 
 
-def updateJobStatus(jobId):
+def updateJobStatus(jobId, status):
     url = URL_PREFIX + '/aigc/job/status/update'
     # JSON data you want to send
     data = {
         'job_id': jobId,
-        'status': 'generating'
+        'status': status
     }
 
     response = requests.post(url, json=data, headers=headers).json()

@@ -14,5 +14,5 @@ import json
 
 # jobId = job['job_id']
 jobId = "40f4f77d54ee45acb362acb72c282834"
-consumer.updateJobStatus(jobId)
+consumer.updateJobStatus(jobId, "failed")
 
