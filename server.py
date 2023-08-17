@@ -70,15 +70,16 @@ def init():
                                                          safety_checker = None, 
                                                          requires_safety_checker = False
                                                          )
+            components = pipeline.components
+            img2imgPipeline = DiffusionPipeline(**components)
         else:
             pipeline = StableDiffusionPipeline.from_pretrained(model, 
                                                                revision="fp16", 
                                                                torch_dtype=torch.float16, 
                                                                safety_checker = None, 
                                                                requires_safety_checker = False)
-
-    components = pipeline.components
-    img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)
+            components = pipeline.components
+            img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)
 
     if loraPath != '':
         if loraPath.endswith('.safetensors'):
@@ -218,7 +219,7 @@ def aigcJobThread():
 
         except Exception as e:
             print(e)
-            
+
         time.sleep(5)
 
 
