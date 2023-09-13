@@ -1,12 +1,10 @@
 from aiohttp import web
 import torch
-import base64, os, json, uuid, time, threading
+import base64, os, json, uuid, time, threading, subprocess
 from io import BytesIO
 import argparse
 from PIL import Image, ImageDraw, ImageFont
 import img_util as imgUtil
-import multiprocessing
-
 
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, DiffusionPipeline
@@ -19,7 +17,6 @@ def sc(self, clip_input, images) :
 
 # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
 safety_checker.StableDiffusionSafetyChecker.forward = sc
-multiprocessing.set_start_method('spawn')
 
 pipeline_lock = threading.Lock()
 
@@ -62,93 +59,111 @@ def init():
     WIDTH = conf.width
     HEIGHT = WIDTH
 
+def launchAigcScript(style, prompt, negPrompt, steps, images, inputImageData):
+    with open('./input/input.data', 'w') as f:
+        f.write(inputImageData)
 
-def createPipeline(style):
-    if not style in modelMap:
-        print("invalid style: " + style)
-        print("fallback to use anything (cartoon)")
-        style = "cartoon"
+    script = 'aigc.py'
+    args = ['--style', style, '--steps', steps, '--images', images, '--prompt', prompt, '--negprompt', negPrompt]
 
-    model = modelMap[style]["model"]
-    lora = modelMap[style].get("lora", None)
-    if model.endswith('.safetensors') or model.endswith('.ckpt'):
-        pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
-        components = pipeline.components
-        img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
-    elif model=='sdxl':
-        pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
-                                                        torch_dtype=torch.float16, 
-                                                        use_safetensors=True, 
-                                                        variant="fp16", 
-                                                        safety_checker = None, 
-                                                        requires_safety_checker = False
-                                                        )
-        components = pipeline.components
-        img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
-    else:
-        pipeline = StableDiffusionPipeline.from_pretrained(model, 
-                                                            revision="fp16", 
-                                                            torch_dtype=torch.float16, 
-                                                            safety_checker = None, 
-                                                            requires_safety_checker = False)
-        components = pipeline.components
-        img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
-        # img2imgPipeline = StableDiffusionImg2ImgPipeline(model,
-        #                                                  revision="fp16",
-        #                                                  torch_dtype=torch.float16, 
-        #                                                  safety_checker = None,
-        #                                                  requires_safety_checker = False)        
-    if lora:
-        if lora.endswith('.safetensors'):
-            print("load lora weights")
-            pipeline.load_lora_weights(".", weight_name=lora)
-        else:
-            pipeline.unet.load_attn_procs(lora)
+    proc = subprocess.Popen(['python', script] + args)
+    proc.wait()
+    images = []
+    path = './output'
+    for filename in os.listdir(path):
+        # Open and read each file
+        if filename.endswith('.data'):
+            with open(os.path.join(path, filename), 'r') as f:
+                data = f.read()
+                images.append(data)
+    return images
 
-    pipeline.to("cuda")
-    if img2imgPipeline:
-        img2imgPipeline.to("cuda")
+# def createPipeline(style):
+#     if not style in modelMap:
+#         print("invalid style: " + style)
+#         print("fallback to use anything (cartoon)")
+#         style = "cartoon"
 
-    return pipeline, img2imgPipeline
+#     model = modelMap[style]["model"]
+#     lora = modelMap[style].get("lora", None)
+#     if model.endswith('.safetensors') or model.endswith('.ckpt'):
+#         pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
+#         components = pipeline.components
+#         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
+#     elif model=='sdxl':
+#         pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+#                                                         torch_dtype=torch.float16, 
+#                                                         use_safetensors=True, 
+#                                                         variant="fp16", 
+#                                                         safety_checker = None, 
+#                                                         requires_safety_checker = False
+#                                                         )
+#         components = pipeline.components
+#         img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
+#     else:
+#         pipeline = StableDiffusionPipeline.from_pretrained(model, 
+#                                                             revision="fp16", 
+#                                                             torch_dtype=torch.float16, 
+#                                                             safety_checker = None, 
+#                                                             requires_safety_checker = False)
+#         components = pipeline.components
+#         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
+#         # img2imgPipeline = StableDiffusionImg2ImgPipeline(model,
+#         #                                                  revision="fp16",
+#         #                                                  torch_dtype=torch.float16, 
+#         #                                                  safety_checker = None,
+#         #                                                  requires_safety_checker = False)        
+#     if lora:
+#         if lora.endswith('.safetensors'):
+#             print("load lora weights")
+#             pipeline.load_lora_weights(".", weight_name=lora)
+#         else:
+#             pipeline.unet.load_attn_procs(lora)
 
-def generate(
-            prompt, 
-            negPrompt = NEGATIVE_PROMPT, 
-            image=None, 
-            steps=50,
-            numImages=NUM_OF_IMAGES,
-            style = "cartoon"
-            ):
-    global pipeline_lock
+#     pipeline.to("cuda")
+#     if img2imgPipeline:
+#         img2imgPipeline.to("cuda")
 
-    result = []
-    with pipeline_lock:
-        txt2imgPipeline, img2imgPipeline = createPipeline(style)
-        if not image or not img2imgPipeline:
-            images = txt2imgPipeline(prompt,
-                                negative_prompt=NEGATIVE_PROMPT,
-                                num_images_per_prompt=numImages,
-                                num_inference_steps=steps,
-                                height=HEIGHT,
-                                width=WIDTH).images
-        else:
-            init_image = imgUtil.base64_to_rgb_image(image)
-            init_image = init_image.resize((WIDTH, HEIGHT))
-            images = img2imgPipeline(prompt,
-                                    image=init_image,
-                                    negative_prompt=NEGATIVE_PROMPT,
-                                    num_images_per_prompt=numImages,
-                                    num_inference_steps=steps,
-                                    ).images
-        for img in images:
-            buffered = BytesIO()
-            # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
-            img.save(buffered, format="JPEG")
-            # finalImage.save(buffered, format="JPEG")
-            base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-            result.append({'base64_str': base64_str})
-        # print(base64_str)
-    return result
+#     return pipeline, img2imgPipeline
+
+# def generate(
+#             prompt, 
+#             negPrompt = NEGATIVE_PROMPT, 
+#             image=None, 
+#             steps=50,
+#             numImages=NUM_OF_IMAGES,
+#             style = "cartoon"
+#             ):
+#     global pipeline_lock
+
+#     result = []
+#     with pipeline_lock:
+#         txt2imgPipeline, img2imgPipeline = createPipeline(style)
+#         if not image or not img2imgPipeline:
+#             images = txt2imgPipeline(prompt,
+#                                 negative_prompt=NEGATIVE_PROMPT,
+#                                 num_images_per_prompt=numImages,
+#                                 num_inference_steps=steps,
+#                                 height=HEIGHT,
+#                                 width=WIDTH).images
+#         else:
+#             init_image = imgUtil.base64_to_rgb_image(image)
+#             init_image = init_image.resize((WIDTH, HEIGHT))
+#             images = img2imgPipeline(prompt,
+#                                     image=init_image,
+#                                     negative_prompt=NEGATIVE_PROMPT,
+#                                     num_images_per_prompt=numImages,
+#                                     num_inference_steps=steps,
+#                                     ).images
+#         for img in images:
+#             buffered = BytesIO()
+#             # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
+#             img.save(buffered, format="JPEG")
+#             # finalImage.save(buffered, format="JPEG")
+#             base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+#             result.append({'base64_str': base64_str})
+#         # print(base64_str)
+#     return result
 
 routes = web.RouteTableDef()
 
@@ -158,54 +173,54 @@ async def handle(request):
     return web.Response(text=text)
 
 
-@routes.post('/txt2image')
-async def text_to_image_handle(request):
-    post = await request.json()
-    if post.get('token') != SERVER_TOKEN:
-        return web.json_response({'result': "invalid token"})
+# @routes.post('/txt2image')
+# async def text_to_image_handle(request):
+#     post = await request.json()
+#     if post.get('token') != SERVER_TOKEN:
+#         return web.json_response({'result': "invalid token"})
 
-    prompt = post.get("prompt")
-    negPrompt = post.get("neg_prompt")
-    num_images = post.get("number_images")
-    steps = post.get("steps")
+#     prompt = post.get("prompt")
+#     negPrompt = post.get("neg_prompt")
+#     num_images = post.get("number_images")
+#     steps = post.get("steps")
 
-    if num_images:
-        num_images = int(num_images)
-    else:
-        num_images = NUM_OF_IMAGES
+#     if num_images:
+#         num_images = int(num_images)
+#     else:
+#         num_images = NUM_OF_IMAGES
 
-    if steps:
-        steps = int(steps)
-    else:
-        steps = STEPS
+#     if steps:
+#         steps = int(steps)
+#     else:
+#         steps = STEPS
     
-    data = generate(prompt=prompt, negPrompt=negPrompt, steps=steps, numImages=num_images)
-    return web.json_response({'result': data})
+#     data = generate(prompt=prompt, negPrompt=negPrompt, steps=steps, numImages=num_images)
+#     return web.json_response({'result': data})
 
-@routes.post('/img2image')
-async def img_to_image_handle(request):
-    post = await request.json()
-    if post.get('token') != SERVER_TOKEN:
-        return web.json_response({'result': "invalid token"})
+# @routes.post('/img2image')
+# async def img_to_image_handle(request):
+#     post = await request.json()
+#     if post.get('token') != SERVER_TOKEN:
+#         return web.json_response({'result': "invalid token"})
 
-    prompt = post.get("prompt")
-    negPrompt = post.get("neg_prompt")
-    image = post.get("image_data")
-    num_images = post.get("number_images")
-    steps = post.get("steps")
+#     prompt = post.get("prompt")
+#     negPrompt = post.get("neg_prompt")
+#     image = post.get("image_data")
+#     num_images = post.get("number_images")
+#     steps = post.get("steps")
 
-    if num_images:
-        num_images = int(num_images)
-    else:
-        num_images = NUM_OF_IMAGES
+#     if num_images:
+#         num_images = int(num_images)
+#     else:
+#         num_images = NUM_OF_IMAGES
 
-    if steps:
-        steps = int(steps)
-    else:
-        steps = STEPS
+#     if steps:
+#         steps = int(steps)
+#     else:
+#         steps = STEPS
     
-    data = generate(prompt=prompt, negPrompt=negPrompt, image=image, steps=steps, numImages=num_images)
-    return web.json_response({'result': data})
+#     data = generate(prompt=prompt, negPrompt=negPrompt, image=image, steps=steps, numImages=num_images)
+#     return web.json_response({'result': data})
 
 def aigcJobThread():
     while True:
@@ -230,15 +245,12 @@ def aigcJobThread():
                     size = config.get('size', 360)
                     style = config.get('style', 'cartoon')
                     
-                    arguments = (prompt, negPrompt, imageData, steps, numImages, style)
-                    p = multiprocessing.Process(target=generate, args=arguments)
-                    p.start()
-                    p.join()
-                    images = p.exitcode
                     # images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
+                    images = launchAigcScript(style, prompt, negPrompt, steps, numImages, imageData)
                     result = []
                     for image in images:
-                        d = image['base64_str']
+                        # d = image['base64_str']
+                        d = image
                         aigcBucketName = bucket.aigc_img_bucket_name
                         aigcFilename = jobId + '-' + str(uuid.uuid4()).replace('-', '')
                         bucket.upload_to_bucket(d, aigcBucketName, aigcFilename)
