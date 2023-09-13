@@ -5,6 +5,8 @@ from io import BytesIO
 import argparse
 from PIL import Image, ImageDraw, ImageFont
 import img_util as imgUtil
+import multiprocessing
+
 
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, DiffusionPipeline
@@ -17,9 +19,6 @@ def sc(self, clip_input, images) :
 
 # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
 safety_checker.StableDiffusionSafetyChecker.forward = sc
-
-pipeline = None
-img2imgPipeline = None
 
 pipeline_lock = threading.Lock()
 
@@ -53,7 +52,7 @@ def initConfig():
 
 
 def init():
-    global pipeline, img2imgPipeline, SERVER_TOKEN, STEPS, WIDTH, HEIGHT
+    global SERVER_TOKEN, STEPS, WIDTH, HEIGHT
     conf = initConfig()
     if conf.token != '':
         SERVER_TOKEN = conf.token
@@ -62,11 +61,8 @@ def init():
     WIDTH = conf.width
     HEIGHT = WIDTH
 
-    selectPipeline(conf.style)
 
-def selectPipeline(style):
-    global pipeline, img2imgPipeline
-
+def createPipeline(style):
     if not style in modelMap:
         print("invalid style: " + style)
         print("fallback to use anything (cartoon)")
@@ -112,24 +108,28 @@ def selectPipeline(style):
     if img2imgPipeline:
         img2imgPipeline.to("cuda")
 
+    return pipeline, img2imgPipeline
 
-def generate(prompt, 
+def generate(
+            prompt, 
             negPrompt = NEGATIVE_PROMPT, 
             image=None, 
             steps=50,
-            numImages=NUM_OF_IMAGES
+            numImages=NUM_OF_IMAGES,
+            style = "cartoon"
             ):
-    global pipeline, img2imgPipeline, pipeline_lock
+    global pipeline_lock
 
     result = []
     with pipeline_lock:
+        txt2imgPipeline, img2imgPipeline = createPipeline(style)
         if not image or not img2imgPipeline:
-            images = pipeline(prompt,
-                            negative_prompt=NEGATIVE_PROMPT,
-                            num_images_per_prompt=numImages,
-                            num_inference_steps=steps,
-                            height=HEIGHT,
-                            width=WIDTH).images
+            images = txt2imgPipeline(prompt,
+                                negative_prompt=NEGATIVE_PROMPT,
+                                num_images_per_prompt=numImages,
+                                num_inference_steps=steps,
+                                height=HEIGHT,
+                                width=WIDTH).images
         else:
             init_image = imgUtil.base64_to_rgb_image(image)
             init_image = init_image.resize((WIDTH, HEIGHT))
@@ -228,7 +228,12 @@ def aigcJobThread():
                     size = config.get('size', 360)
                     style = config.get('style', 'cartoon')
                     
-                    images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
+                    arguments = (prompt, negPrompt, imageData, steps, numImages, style)
+                    p = multiprocessing.Process(target=generate, args=arguments)
+                    p.start()
+                    p.join()
+                    images = p.exitcode
+                    # images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
                     result = []
                     for image in images:
                         d = image['base64_str']
