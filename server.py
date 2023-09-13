@@ -31,11 +31,18 @@ HEIGHT=480
 WIDTH=480
 STEPS = 50
 
+modelMap = {
+    "cartoon": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
+    "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
+    "realistic": {"model": "sdxl"},
+    "realistic-adult": {"model": "sdxl"}
+}
+
 NEGATIVE_PROMPT="(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed"
 
 def initConfig():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, required=True, help='base model path or name on huggingface')
+    parser.add_argument('--style', type=str, required=True, help='cartoon | realistic')
     parser.add_argument('--lora', type=str, default='', help='lora location')
     parser.add_argument('--token', type=str, default="123456", help='server token')
     parser.add_argument('--steps', type=int, default=50, help='steps')
@@ -55,40 +62,52 @@ def init():
     WIDTH = conf.width
     HEIGHT = WIDTH
 
-    model = conf.model
-    loraPath = conf.lora
-    print("model: {}\nlora:{}".format(model, loraPath))
-    # pipeline = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", revision="fp16", torch_dtype=torch.float16)
+    selectPipeline(conf.style)
+
+def selectPipeline(style):
+    global pipeline, img2imgPipeline
+
+    if not style in modelMap:
+        print("invalid style: " + style)
+        print("fallback to use anything (cartoon)")
+        style = "cartoon"
+
+    model = modelMap[style]["model"]
+    lora = modelMap[style].get("lora", None)
     if model.endswith('.safetensors') or model.endswith('.ckpt'):
         pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
+        components = pipeline.components
+        img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
+    elif model=='sdxl':
+        pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+                                                        torch_dtype=torch.float16, 
+                                                        use_safetensors=True, 
+                                                        variant="fp16", 
+                                                        safety_checker = None, 
+                                                        requires_safety_checker = False
+                                                        )
+        components = pipeline.components
+        img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
     else:
-        if model=='sdxl':
-            pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
-                                                         torch_dtype=torch.float16, 
-                                                         use_safetensors=True, 
-                                                         variant="fp16", 
-                                                         safety_checker = None, 
-                                                         requires_safety_checker = False
-                                                         )
-            components = pipeline.components
-            img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
-        else:
-            pipeline = StableDiffusionPipeline.from_pretrained(model, 
-                                                               revision="fp16", 
-                                                               torch_dtype=torch.float16, 
-                                                               safety_checker = None, 
-                                                               requires_safety_checker = False)
-            components = pipeline.components
-            img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)
-
-    if loraPath != '':
-        if loraPath.endswith('.safetensors'):
+        pipeline = StableDiffusionPipeline.from_pretrained(model, 
+                                                            revision="fp16", 
+                                                            torch_dtype=torch.float16, 
+                                                            safety_checker = None, 
+                                                            requires_safety_checker = False)
+        components = pipeline.components
+        img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
+        
+    if lora:
+        if lora.endswith('.safetensors'):
             print("load lora weights")
-            pipeline.load_lora_weights(".", weight_name=loraPath)
+            pipeline.load_lora_weights(".", weight_name=lora)
         else:
-            pipeline.unet.load_attn_procs(conf.lora)
+            pipeline.unet.load_attn_procs(lora)
 
     pipeline.to("cuda")
+    if img2imgPipeline:
+        img2imgPipeline.to("cuda")
+
 
 def generate(prompt, 
             negPrompt = NEGATIVE_PROMPT, 
@@ -203,6 +222,7 @@ def aigcJobThread():
                     steps = config.get('steps', 50)
                     numImages = config.get('num_images', 8)
                     size = config.get('size', 360)
+                    style = config.get('style', 'cartoon')
                     
                     images = generate(prompt=prompt, negPrompt=negPrompt, image=imageData, steps=steps, numImages=numImages)
                     result = []
