@@ -211,6 +211,7 @@ def aigcJobThread():
         try:
             job = consumer.getNextAvailableJob()
             if job:
+                print(job)
                 jobId = job['job_id']
                 try:
                     consumer.updateJobStatus(jobId, "generating")
