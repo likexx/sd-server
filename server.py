@@ -34,8 +34,8 @@ STEPS = 50
 modelMap = {
     "cartoon": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
     "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
-    "realistic": {"model": "sdxl"},
-    "realistic-adult": {"model": "sdxl"}
+    "real": {"model": "runwayml/stable-diffusion-v1-5"},
+    "real-adult": {"model": "runwayml/stable-diffusion-v1-5"}
 }
 
 NEGATIVE_PROMPT="(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed"
@@ -96,7 +96,11 @@ def selectPipeline(style):
                                                             requires_safety_checker = False)
         components = pipeline.components
         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
-        
+        # img2imgPipeline = StableDiffusionImg2ImgPipeline(model,
+        #                                                  revision="fp16",
+        #                                                  torch_dtype=torch.float16, 
+        #                                                  safety_checker = None,
+        #                                                  requires_safety_checker = False)        
     if lora:
         if lora.endswith('.safetensors'):
             print("load lora weights")
