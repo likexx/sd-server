@@ -19,6 +19,7 @@ def sc(self, clip_input, images) :
 
 # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
 safety_checker.StableDiffusionSafetyChecker.forward = sc
+multiprocessing.set_start_method('spawn')
 
 pipeline_lock = threading.Lock()
 
