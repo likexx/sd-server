@@ -129,6 +129,8 @@ def generate(
 def worker():
     try:
         job = consumer.getNextAvailableJob()
+        if not job:
+            print("no job found")
         if job:
             print(job)
             jobId = job['job_id']
