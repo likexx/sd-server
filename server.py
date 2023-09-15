@@ -59,15 +59,19 @@ def init():
     WIDTH = conf.width
     HEIGHT = WIDTH
 
-def launchAigcScript(style, prompt, negPrompt, steps, images, inputImageData):
-    with open('./input/input.data', 'w') as f:
-        f.write(inputImageData)
+def checkAigcResult(style, prompt, negPrompt, steps, images, inputImageData):
+    OUTPUT_COMPLETE_FILEPATH = './output/complete'
+    waitCount = 0
+    while not os.path.exists(OUTPUT_COMPLETE_FILEPATH):
+        if waitCount > 300:
+            print("not finding completion signal")
+            waitCount=0
+        waitCount+=1
 
-    script = 'aigc.py'
-    args = ['--style', style, '--steps', steps, '--images', images, '--prompt', prompt, '--negprompt', negPrompt]
+    jobIdStr = ""
+    with open(OUTPUT_COMPLETE_FILEPATH, 'w') as f:
+        jobIdStr = f.read()
 
-    proc = subprocess.Popen(['python', script] + args)
-    proc.wait()
     images = []
     path = './output'
     for filename in os.listdir(path):
@@ -76,7 +80,7 @@ def launchAigcScript(style, prompt, negPrompt, steps, images, inputImageData):
             with open(os.path.join(path, filename), 'r') as f:
                 data = f.read()
                 images.append(data)
-    return images
+    return jobId, images
 
 # def createPipeline(style):
 #     if not style in modelMap:
