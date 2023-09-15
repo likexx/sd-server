@@ -1,5 +1,5 @@
 import torch
-import base64, os, json, uuid, time, threading
+import base64, os, json, uuid, time
 from io import BytesIO
 import argparse
 from PIL import Image, ImageDraw, ImageFont
@@ -36,18 +36,10 @@ modelMap = {
 
 NEGATIVE_PROMPT="(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed"
 
-def initArgs():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--style', type=str, default='cartoon', help='cartoon | real')
-    parser.add_argument('--steps', type=int, default=50, help='infer steps')
-    parser.add_argument('--images', type=int, default=4, help='image number')
-    parser.add_argument('--prompt', type=str, default="", help='prompt')
-    parser.add_argument('--negprompt', type=str, default=NEGATIVE_PROMPT, help='neg prompt')
-    parser.add_argument('--input', type=str, default='./input/input.data', help='input file')
-    parser.add_argument('--output', type=str, default='./input', help='output path')
-    # Parse the arguments
-    args = parser.parse_args()
-    return args
+NEW_JOB_FILENAME = "./input/new_job_start"
+JOB_CONFIG_FILENAME = "./input/job.json"
+IMAGE_DATA_FILENAME = "./input/image.data"
+OUTPUT_PATH = "./output"
 
 def createPipeline(style):
     if not style in modelMap:
@@ -98,6 +90,8 @@ def createPipeline(style):
     return pipeline, img2imgPipeline
 
 def generate(
+            txt2imgPipeline,
+            img2imgPipeline,
             prompt, 
             negPrompt = NEGATIVE_PROMPT, 
             image=None, 
@@ -106,7 +100,6 @@ def generate(
             style = "cartoon"
             ):
     result = []
-    txt2imgPipeline, img2imgPipeline = createPipeline(style)
     if not image or not img2imgPipeline:
         images = txt2imgPipeline(prompt,
                             negative_prompt=NEGATIVE_PROMPT,
@@ -139,10 +132,34 @@ def createImages(prompt, negPrompt, imageData, steps, numImages, style):
         d = image['base64_str']
         with open('./output/output{}.data'.format(i), 'w') as f:
             f.write(d)
+    with open('./output/complete', 'w') as f:
+        f.write("done")
+
+def initializePipeline(config):
+    imageData = None
+    jobData = None
+    imageFilepath = os.path.join(config.input, IMAGE_DATA_FILENAME)
+    jobFilepath = os.path.join(config.input, JOB_CONFIG_FILENAME)
+
+    with open(imageFilepath, 'r') as f:
+        imageData = f.read()
+    
+    with open(jobFilepath, 'r') as f:
+        jobData = json.load(f)
+    
+    style = jobData["style"]
+    p1, p2 =  createPipeline(style)
+    return jobData, imageData, p1, p2
 
 if __name__ == '__main__':
-    args = initArgs()
-    imageData = ""
-    with open(args.input, 'r') as f:
-        imageData = f.read()
-    createImages(args.prompt, args.negprompt, imageData, args.steps, args.images, args.style)
+    count = 0
+    while not os.path.exists(NEW_JOB_FILENAME):
+        if count >= 300:
+            print("new job not found")
+            count = 0
+        time.sleep(2)
+        count += 1
+        continue
+    
+    job, pipeline, imageData, img2imgPipeline = initializePipeline()
+    createImages(pipeline, img2imgPipeline, job['prompt'], job['negprompt'], imageData, job['steps'], job['images'])
