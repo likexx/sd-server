@@ -17,8 +17,6 @@ def sc(self, clip_input, images) :
 # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
 safety_checker.StableDiffusionSafetyChecker.forward = sc
 
-pipeline_lock = threading.Lock()
-
 WATERMARK_FONT = ImageFont.truetype("Arial.ttf", 30)
 
 SERVER_TOKEN = os.environ.get("SERVER_TOKEN", "123456")
