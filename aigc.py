@@ -148,10 +148,11 @@ def initializePipeline(config):
         jobData = json.load(f)
     
     style = jobData["style"]
-    p1, p2 =  createPipeline(style)
+    p1, p2 =  createPipeline(stylegit )
     return jobData, imageData, p1, p2
 
 if __name__ == '__main__':
+    print('waiting new job')
     count = 0
     while not os.path.exists(NEW_JOB_FILENAME):
         if count >= 300:
@@ -160,6 +161,6 @@ if __name__ == '__main__':
         time.sleep(2)
         count += 1
         continue
-    
+
     job, pipeline, imageData, img2imgPipeline = initializePipeline()
     createImages(pipeline, img2imgPipeline, job['prompt'], job['negprompt'], imageData, job['steps'], job['images'])
