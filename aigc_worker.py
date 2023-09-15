@@ -95,35 +95,34 @@ def generate(
             numImages=NUM_IMAGES,
             style = "cartoon"
             ):
-    global pipeline_lock
 
     result = []
-    with pipeline_lock:
-        txt2imgPipeline, img2imgPipeline = createPipeline(style)
-        if not image or not img2imgPipeline:
-            images = txt2imgPipeline(prompt,
+    txt2imgPipeline, img2imgPipeline = createPipeline(style)
+    
+    if not image or not img2imgPipeline:
+        images = txt2imgPipeline(prompt,
+                            negative_prompt=NEGATIVE_PROMPT,
+                            num_images_per_prompt=numImages,
+                            num_inference_steps=steps,
+                            height=IMG_HEIGHT,
+                            width=IMG_WIDTH).images
+    else:
+        init_image = imgUtil.base64_to_rgb_image(image)
+        init_image = init_image.resize((IMG_WIDTH, IMG_HEIGHT))
+        images = img2imgPipeline(prompt,
+                                image=init_image,
                                 negative_prompt=NEGATIVE_PROMPT,
                                 num_images_per_prompt=numImages,
                                 num_inference_steps=steps,
-                                height=IMG_HEIGHT,
-                                width=IMG_WIDTH).images
-        else:
-            init_image = imgUtil.base64_to_rgb_image(image)
-            init_image = init_image.resize((IMG_WIDTH, IMG_HEIGHT))
-            images = img2imgPipeline(prompt,
-                                    image=init_image,
-                                    negative_prompt=NEGATIVE_PROMPT,
-                                    num_images_per_prompt=numImages,
-                                    num_inference_steps=steps,
-                                    ).images
-        for img in images:
-            buffered = BytesIO()
-            # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
-            img.save(buffered, format="JPEG")
-            # finalImage.save(buffered, format="JPEG")
-            base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-            result.append({'base64_str': base64_str})
-        # print(base64_str)
+                                ).images
+    for img in images:
+        buffered = BytesIO()
+        # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
+        img.save(buffered, format="JPEG")
+        # finalImage.save(buffered, format="JPEG")
+        base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        result.append({'base64_str': base64_str})
+
     return result
 
 def worker():
