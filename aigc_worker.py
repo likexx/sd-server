@@ -138,6 +138,7 @@ def generate(
     txt2imgPipeline, img2imgPipeline = createPipeline(style)
     
     if not image or not img2imgPipeline:
+        print("generate with txt2img")
         images = txt2imgPipeline(enhancedPrompt,
                             negative_prompt=NEGATIVE_PROMPT,
                             num_images_per_prompt=numImages,
@@ -145,6 +146,7 @@ def generate(
                             height=IMG_HEIGHT,
                             width=IMG_WIDTH).images
     else:
+        print("generate with img2img")
         init_image = imgUtil.base64_to_rgb_image(image)
         init_image = init_image.resize((IMG_WIDTH, IMG_HEIGHT))
         images = img2imgPipeline(enhancedPrompt,
