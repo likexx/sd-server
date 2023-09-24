@@ -15,8 +15,6 @@ import gcloud_bucket as bucket
 def sc(self, clip_input, images) :
     return images, [False for i in images]
 
-# edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
-safety_checker.StableDiffusionSafetyChecker.forward = sc
 
 
 WATERMARK_FONT = ImageFont.truetype("Arial.ttf", 30)
@@ -32,8 +30,18 @@ modelMap = {
     "cartoon": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
     "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
     "real": {"model": "runwayml/stable-diffusion-v1-5"},
-    "real-adult": {"model": "runwayml/stable-diffusion-v1-5"}
+    "real-adult": {"model": "runwayml/stable-diffusion-v1-5"},
+    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors" }
 }
+
+PROMPT_SUGGESTION = [
+    'best quality',
+    'realistic',
+    'masterpiece',
+    'vivid',
+    'vibrant colors',
+    'photorealistic',
+]
 
 NEGATIVE_PROMPT="(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed"
 
@@ -43,28 +51,51 @@ def createPipeline(style):
         print("fallback to use anything (cartoon)")
         style = "cartoon"
 
+    requireSafetyChecker = True    
+    if style.endswith('-adult'):
+        # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
+        safety_checker.StableDiffusionSafetyChecker.forward = sc
+        requireSafetyChecker = False
+
     model = modelMap[style]["model"]
     lora = modelMap[style].get("lora", None)
     if model.endswith('.safetensors') or model.endswith('.ckpt'):
-        pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
+        if not requireSafetyChecker:
+            pipeline = StableDiffusionPipeline.from_single_file(model, safety_checker = None, requires_safety_checker = False)
+        else:
+            pipeline = StableDiffusionPipeline.from_single_file(model)
         components = pipeline.components
         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
     elif model=='sdxl':
-        pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
-                                                        torch_dtype=torch.float16, 
-                                                        use_safetensors=True, 
-                                                        variant="fp16", 
-                                                        safety_checker = None, 
-                                                        requires_safety_checker = False
-                                                        )
+        if not requireSafetyChecker:
+            pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+                                                            torch_dtype=torch.float16, 
+                                                            use_safetensors=True, 
+                                                            variant="fp16", 
+                                                            safety_checker = None, 
+                                                            requires_safety_checker = False
+                                                            )
+        else:
+            pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
+                                                            torch_dtype=torch.float16, 
+                                                            use_safetensors=True, 
+                                                            variant="fp16"
+                                                            )
+
         components = pipeline.components
         img2imgPipeline = StableDiffusionXLImg2ImgPipeline(**components)
     else:
-        pipeline = StableDiffusionPipeline.from_pretrained(model, 
-                                                            revision="fp16", 
-                                                            torch_dtype=torch.float16, 
-                                                            safety_checker = None, 
-                                                            requires_safety_checker = False)
+        if not requireSafetyChecker:
+            pipeline = StableDiffusionPipeline.from_pretrained(model, 
+                                                                revision="fp16", 
+                                                                torch_dtype=torch.float16, 
+                                                                safety_checker = None, 
+                                                                requires_safety_checker = False)
+        else:
+            pipeline = StableDiffusionPipeline.from_pretrained(model, 
+                                                                revision="fp16", 
+                                                                torch_dtype=torch.float16)
+
         components = pipeline.components
         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
         # img2imgPipeline = StableDiffusionImg2ImgPipeline(model,
@@ -97,10 +128,17 @@ def generate(
             ):
 
     result = []
+    
+    enhancedPrompt = prompt
+    for w in PROMPT_SUGGESTION:
+        if enhancedPrompt.find(w) < 0:
+            enhancedPrompt += "," + w
+    print(enhancedPrompt)
+
     txt2imgPipeline, img2imgPipeline = createPipeline(style)
     
     if not image or not img2imgPipeline:
-        images = txt2imgPipeline(prompt,
+        images = txt2imgPipeline(enhancedPrompt,
                             negative_prompt=NEGATIVE_PROMPT,
                             num_images_per_prompt=numImages,
                             num_inference_steps=steps,
@@ -109,7 +147,7 @@ def generate(
     else:
         init_image = imgUtil.base64_to_rgb_image(image)
         init_image = init_image.resize((IMG_WIDTH, IMG_HEIGHT))
-        images = img2imgPipeline(prompt,
+        images = img2imgPipeline(enhancedPrompt,
                                 image=init_image,
                                 negative_prompt=NEGATIVE_PROMPT,
                                 num_images_per_prompt=numImages,
@@ -137,9 +175,9 @@ def worker():
                 consumer.updateJobStatus(jobId, "generating")
                 config = job['job_config']
                 # config = json.loads(jobConfigStr)
-                imagefile = config.get('image_file', "")
-                bucketName = config.get('bucket', "")
-                imageData = ""
+                imagefile = config.get('image_file', None)
+                bucketName = config.get('bucket', None)
+                imageData = None
                 if imagefile and bucketName:
                     imageData = bucket.read_file_from_bucket(bucket_name=bucketName, blob_name=imagefile)
                 prompt = config.get('prompt', '')
