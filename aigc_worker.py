@@ -31,7 +31,9 @@ modelMap = {
     "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
     "real": {"model": "runwayml/stable-diffusion-v1-5"},
     "real-adult": {"model": "runwayml/stable-diffusion-v1-5"},
-    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors" }
+    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors" },
+
+    "anim-porn": { "model": "/mnt/disk/model/model_anim_porn/pornmasterAnime_fp16V2.safetensors" }
 }
 
 PROMPT_SUGGESTION = [
