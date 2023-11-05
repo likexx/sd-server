@@ -12,7 +12,7 @@ from diffusers.pipelines.stable_diffusion import safety_checker
 import consumer
 import gcloud_bucket as bucket
 
-def sc(self, clip_input, images) :
+def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
 
 
@@ -28,12 +28,12 @@ INFER_STEPS = 50
 
 modelMap = {
     "cartoon": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
-    "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
+    "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors", "nsfw": False },
     "real": {"model": "runwayml/stable-diffusion-v1-5"},
-    "real-adult": {"model": "runwayml/stable-diffusion-v1-5"},
-    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors" },
+    "real-adult": {"model": "runwayml/stable-diffusion-v1-5", "nsfw": False},
+    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": False },
 
-    "anim-porn": { "model": "/mnt/disk/model/model_anim_porn/pornmasterAnime_fp16V2.safetensors" }
+    "anim-porn": { "model": "/mnt/disk/model/model_anim_porn/pornmasterAnime_fp16V2.safetensors", "nsfw": False }
 }
 
 PROMPT_SUGGESTION = [
@@ -53,10 +53,12 @@ def createPipeline(style):
         print("fallback to use anything (cartoon)")
         style = "cartoon"
 
+    styleConfig = modelMap[style]
     requireSafetyChecker = True    
-    if style.endswith('-adult'):
+    if "nsfw" in styleConfig and styleConfig["nsfw"]==False:
         # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
-        safety_checker.StableDiffusionSafetyChecker.forward = sc
+        print("remove nsfw check")
+        safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
         requireSafetyChecker = False
 
     model = modelMap[style]["model"]
