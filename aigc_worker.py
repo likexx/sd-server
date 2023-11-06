@@ -31,7 +31,8 @@ modelMap = {
     "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors", "nsfw": False },
     "real": {"model": "runwayml/stable-diffusion-v1-5"},
     "real-adult": {"model": "runwayml/stable-diffusion-v1-5", "nsfw": False},
-    "cartoon-everything-adult": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": False },
+    "cartoon2": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": True },
+    "cartoon2-nsfw": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": False },
 
     "anim-porn": { "model": "/mnt/disk/model/model_anim_porn/pornmasterAnime_fp16V2.safetensors", "nsfw": False }
 }
