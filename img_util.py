@@ -1,7 +1,6 @@
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
-import base64, os
-import base64
+import base64, os, time
 import requests
 from openai import OpenAI
 
@@ -53,19 +52,24 @@ def generate_with_dalle3(prompt, k):
 
     result = []
 
-    while k > 0:
-        response = client.images.generate(
-            model="dall-e-3",
-            prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1,
-        )
-        imageUrl = response.data[0].url
-        base64data = image_url_to_base64(imageUrl)
-        result.append[{"base64_str": base64data}]
-        k-=1
-    
+    try:
+        while k > 0:
+            time.sleep(65)
+            response = client.images.generate(
+                model="dall-e-3",
+                prompt=prompt,
+                size="1024x1024",
+                quality="standard",
+                n=1,
+            )
+            imageUrl = response.data[0].url
+            base64data = image_url_to_base64(imageUrl)
+            result.append({"base64_str": base64data})
+            k-=1
+            print("received from openai dalle3. remaining images: {}".format(k))
+    except Exception as err:
+        print(err)
+
     return result
 
 # Function to convert an image URL to a base64 string
