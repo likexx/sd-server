@@ -1,6 +1,9 @@
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
+import base64, os
 import base64
+import requests
+from openai import OpenAI
 
 def base64_to_rgb_image(base64_data):
     # Decode the base64 data
@@ -39,3 +42,54 @@ def add_watermark(input_image, watermark_text):
     watermarked = Image.alpha_composite(image.convert('RGBA'), transparent)
 
     return watermarked.convert('RGB')
+
+
+def generate_with_dalle3(prompt, k):
+    # export OPENAI_API_KEY='your-api-key-here'
+    apiKey = os.getenv("OPENAI_API_KEY")
+    if apiKey != "":
+        print("found api key")
+    client = OpenAI()
+
+    result = []
+
+    while k > 0:
+        response = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt,
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+        imageUrl = response.data[0].url
+        base64data = image_url_to_base64(imageUrl)
+        result.append[{"base64_str": base64data}]
+        k-=1
+    
+    return result
+
+# Function to convert an image URL to a base64 string
+def image_url_to_base64(url):
+    # Send a GET request to the image URL
+    response = requests.get(url)
+    
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Open the image as a file-like object using BytesIO
+        image = Image.open(BytesIO(response.content))
+        
+        # Convert the image to the desired format (e.g., JPEG, PNG)
+        buffered = BytesIO()
+        image_format = 'PNG'  # or 'JPEG'
+        image.save(buffered, format=image_format)
+        
+        # Encode the image data to base64
+        img_str = base64.b64encode(buffered.getvalue())
+        
+        # If you want the base64 string in text format
+        img_str = img_str.decode('utf-8')
+        
+        return img_str
+    else:
+        print("Failed to retrieve the image.")
+        return None

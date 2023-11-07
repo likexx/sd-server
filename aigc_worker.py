@@ -199,12 +199,16 @@ def worker():
                 elif style == 'realistic-adult':
                     style = 'real-adult'
                 
-                images = generate(prompt=prompt, 
-                                  negPrompt=negPrompt, 
-                                  image=imageData, 
-                                  steps=steps, 
-                                  numImages=numImages, 
-                                  style=style)
+                if style != "dalle3":
+                    images = generate(prompt=prompt, 
+                                    negPrompt=negPrompt, 
+                                    image=imageData, 
+                                    steps=steps, 
+                                    numImages=numImages, 
+                                    style=style)
+                else:
+                    images = imgUtil.generate_with_dalle3(prompt=prompt, k=numImages)
+                    
                 result = []
                 for image in images:
                     d = image['base64_str']
