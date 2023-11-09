@@ -49,5 +49,6 @@ def updateJobResult(jobId, result):
     }
 
     response = requests.post(url, json=data, headers=headers).json()
+    print(response)
     return response['data']
     
