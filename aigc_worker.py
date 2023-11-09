@@ -208,9 +208,11 @@ def worker():
                                     style=style)
                 else:
                     images = imgUtil.generate_with_dalle3(prompt=prompt, k=numImages)
-                    
+
                 result = []
                 for image in images:
+                    if not image['base64_str']:
+                        continue
                     d = image['base64_str']
                     aigcBucketName = bucket.aigc_img_bucket_name
                     aigcFilename = jobId + '-' + str(uuid.uuid4()).replace('-', '')
