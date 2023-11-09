@@ -48,7 +48,11 @@ def updateJobResult(jobId, result):
         'result': result
     }
 
-    response = requests.post(url, json=data, headers=headers).json()
-    print(response)
-    return response['data']
+    try:
+        response = requests.post(url, json=data, headers=headers).json()
+        print(response)
+        return response['data']
+    except Exception as err:
+        print("update job result error: {}".format(err))
+        return True
     
