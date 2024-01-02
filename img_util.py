@@ -54,7 +54,7 @@ def generate_with_dalle3(prompt, k):
 
     try:
         while k > 0:
-            time.sleep(65)
+            # time.sleep(65)
             response = client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
@@ -62,7 +62,9 @@ def generate_with_dalle3(prompt, k):
                 quality="standard",
                 n=1,
             )
+            print(response.data[0])
             imageUrl = response.data[0].url
+            print(imageUrl)
             base64data = image_url_to_base64(imageUrl)
             result.append({"base64_str": base64data})
             k-=1
@@ -97,3 +99,9 @@ def image_url_to_base64(url):
     else:
         print("Failed to retrieve the image.")
         return None
+
+def saveBase64toPNG(imageData, outputFilePath):
+    decodedImageData = base64.b64decode(imageData)
+    with open(outputFilePath, 'wb') as file:
+        file.write(decodedImageData)
+    print("saved to {}".format(outputFilePath))

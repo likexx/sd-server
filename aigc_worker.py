@@ -211,9 +211,9 @@ def worker():
 
                 result = []
                 for image in images:
-                    if not image['base64_str']:
+                    if not image['base64_data']:
                         continue
-                    d = image['base64_str']
+                    d = image['base64_data']
                     aigcBucketName = bucket.aigc_img_bucket_name
                     aigcFilename = jobId + '-' + str(uuid.uuid4()).replace('-', '')
                     bucket.upload_to_bucket(d, aigcBucketName, aigcFilename)

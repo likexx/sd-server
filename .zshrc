@@ -1,0 +1,2 @@
+alias pip='noglob pip'
+
