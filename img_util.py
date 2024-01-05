@@ -17,6 +17,16 @@ def base64_to_rgb_image(base64_data):
     
     return rgb_img
 
+def image_to_base64(img):
+    buffered = BytesIO()
+    img.save(buffered, format="JPEG")
+    # finalImage.save(buffered, format="JPEG")
+    base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return base64_str
+
+def add_watermark_to_base64(base64Data, text):
+    img = base64_to_rgb_image(base64Data)
+    return add_watermark(img, text)
 
 def add_watermark(input_image, watermark_text):
     # Make a copy of the input image to ensure original isn't altered

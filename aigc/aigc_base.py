@@ -6,32 +6,14 @@ from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline, A
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, DiffusionPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
 
-from . import aigc_base
+from . import aigc_base, models
 
 
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
 
 class AigcBase:
-    modelMap = {
-        "cartoon": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors" },
-        "cartoon-adult": { "model": "/mnt/disk/model/model_anything/AnythingV5Ink_ink.safetensors", "nsfw": False },
-        "real": {"model": "runwayml/stable-diffusion-v1-5"},
-        "real-adult": {"model": "runwayml/stable-diffusion-v1-5", "nsfw": False},
-        "cartoon2": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": True },
-        "cartoon2-nsfw": { "model": "/mnt/disk/model/anything_everything/anythingAndEverything.safetensors", "nsfw": False },
-        "sdxl": {"model": "sdxl"},
-        "anim-porn": { "model": "/mnt/disk/model/model_anim_porn/pornmasterAnime_fp16V2.safetensors", "nsfw": False }
-    }
-
-    PROMPT_SUGGESTION = [
-        'best quality',
-        'realistic',
-        'masterpiece',
-        'vivid',
-        'vibrant colors',
-        'photorealistic',
-    ]
+    modelMap = models.MODELS
 
     def __init__(self, params):
         self.prompt = params.prompt
@@ -53,7 +35,8 @@ class AigcBase:
         img2imgPipeline = StableDiffusionImg2ImgPipeline(**components)     
         return [pipeline, img2imgPipeline]
     
-    def __loadForSDXL(self, requireSafetyChecker):
+    def __loadForAutoPipeline(self, model, requireSafetyChecker):
+        print('load for {}'.format(model))
         if not requireSafetyChecker:
             # pipeline = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", 
             #                                                 # torch_dtype=torch.float16, 
@@ -63,7 +46,7 @@ class AigcBase:
             #                                                 requires_safety_checker = False
             #                                                 )
             pipeline = AutoPipelineForText2Image.from_pretrained(
-                            "stabilityai/stable-diffusion-xl-base-1.0", 
+                            model, 
                             # torch_dtype=torch.float16, 
                             variant="fp16",
                             use_safetensors=True,
@@ -77,7 +60,7 @@ class AigcBase:
             #                                                 variant="fp16"
             #                                                 )
             pipeline = AutoPipelineForText2Image.from_pretrained(
-                            "stabilityai/stable-diffusion-xl-base-1.0", 
+                            model, 
                             # torch_dtype=torch.float16, 
                             variant="fp16",
                             use_safetensors=True,
@@ -109,26 +92,29 @@ class AigcBase:
 
 
     def __createPipeline(self, style):
+        print("******* create pipeline for style {}".format(style))
         modelMap = AigcBase.modelMap
         if not style in modelMap:
             print("invalid style: " + style)
             print("fallback to use anything (cartoon)")
             style = "cartoon"
 
-        styleConfig = modelMap[style]
+        modelConfig = modelMap[style]
         requireSafetyChecker = True
-        if styleConfig.get('nsfw', True) == False:
+        if modelConfig.get('nsfw', True) == False:
             # edit StableDiffusionSafetyChecker class so that, when called, it just returns the images and an array of True values
             print("remove nsfw check")
             safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
             requireSafetyChecker = False
 
-        model = modelMap[style]["model"]
-        lora = modelMap[style].get("lora", None)
+        model = modelConfig["model"]
+        lora = modelConfig.get("lora", None)
+
+        print("using model {}".format(model))
         if model.endswith('.safetensors') or model.endswith('.ckpt'):
             pipeline, img2imgPipeline = self.__loadFromExistingModels(model, requireSafetyChecker)    
-        elif model=='sdxl':
-            pipeline, img2imgPipeline = self.__loadForSDXL(requireSafetyChecker)    
+        elif modelConfig['pipeline_type']=='auto':
+            pipeline, img2imgPipeline = self.__loadForAutoPipeline(model, requireSafetyChecker)    
         else:
             pipeline, img2imgPipeline = self.__loadFromOnlineModels(model, requireSafetyChecker)
 
@@ -149,9 +135,16 @@ class AigcBase:
     
     def generate(self):
         result = []
+
+        modelConfig = self.modelMap.get(self.style, None)
+        if not modelConfig:
+            print('ERROR: cannot load model {}'.format(self.style))
+            return result
     
         enhancedPrompt = self.prompt
-        for w in AigcBase.PROMPT_SUGGESTION:
+        promptSuggestions = modelConfig.get("prompts", [])
+
+        for w in promptSuggestions:
             if enhancedPrompt.find(w) < 0:
                 enhancedPrompt += "," + w
 
@@ -181,7 +174,6 @@ class AigcBase:
                                     ).images
         for img in images:
             buffered = BytesIO()
-            # finalImage = imgUtil.add_watermark(img, "Created by KK Studio")
             img.save(buffered, format="JPEG")
             # finalImage.save(buffered, format="JPEG")
             base64_str = base64.b64encode(buffered.getvalue()).decode('utf-8')

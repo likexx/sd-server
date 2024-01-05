@@ -1,17 +1,24 @@
 import requests
-import json
+import json, os
 
 URL_PREFIX_LIST = [
-    'http://34.31.203.162:8080/api/v1',
-    'http://10.128.0.18:8080/api/v1',
+    # 'http://34.31.203.162:8080/api/v1',
+    # 'http://10.128.0.18:8080/api/v1',
+    'http://35.184.169.61:8080/api/v1',
 ]
 
 URL_PREFIX = 'http://34.31.203.162:8080/api/v1'
-headers = {
-    'Content-type': 'application/json',
-    'Authorization': 'token 63D4647F-00B6-49B3-BB40-6A1B927F843E',
-    }
 
+def createHeaders():
+    headers = {
+        'Content-type': 'application/json',
+        'Authorization': 'token 63D4647F-00B6-49B3-BB40-6A1B927F843E',
+        }
+    
+    envToken = os.getenv("AIGC_ACCESS_TOKEN")
+    if envToken:
+        headers['Authorization'] = "token {}".format(envToken)
+    return headers
 
 def getNextAvailableJob():
     global URL_PREFIX, URL_PREFIX_LIST
@@ -22,7 +29,7 @@ def getNextAvailableJob():
         data = {
         }
         print("fetch job from {}".format(url))
-        response = requests.post(url, json=data, headers=headers).json()
+        response = requests.post(url, json=data, headers=createHeaders()).json()
         jobData = response['data']
         if jobData:
             return jobData
@@ -36,7 +43,7 @@ def updateJobStatus(jobId, status):
         'status': status
     }
 
-    response = requests.post(url, json=data, headers=headers).json()
+    response = requests.post(url, json=data, headers=createHeaders()).json()
     return response['data']
     
 
@@ -49,7 +56,7 @@ def updateJobResult(jobId, result):
     }
 
     try:
-        response = requests.post(url, json=data, headers=headers).json()
+        response = requests.post(url, json=data, headers=createHeaders()).json()
         print(response)
         return response['data']
     except Exception as err:
