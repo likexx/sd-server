@@ -13,7 +13,7 @@ params = aigc.AigcParam(
     prompt= '''
 Create a vibrant, full-color anime-style illustration of a powerful super saiya fighter experiencing a moment of intense transformation or energy release. The super saiya fighter is in the center of the composition, with a close-up on their face showing a serene yet focused expression. Their eyes are closed, suggesting an inward focus of power. The character's hair is styled in large, upward-spiking tufts that resemble flames and should be colored with a gradient of fiery shades. Energy lines and light rays emanate from the character, radiating outwards in a burst of brilliant light. The energy effect should include a spectrum of bright colors like electric blue, intense yellow, and white at the center, signifying a powerful surge of energy. The character's skin should glow with a soft light, contrasting with the bright background, illustrating the epicenter of the power release.
 ''',
-    style='cartoon', 
+    style='cartoon2', 
     steps=50,
     numImages=4,
     seed=12,
