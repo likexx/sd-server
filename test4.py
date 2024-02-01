@@ -18,7 +18,7 @@ A male super saiyan fighter is flying with arms straightened, long golden hair, 
     numImages=8,
     seed=12,
     deviceType='cuda')
-params.image = img_util.convert_image_to_base64('./input/p16.png')
+# params.image = img_util.convert_image_to_base64('./input/p16.png')
 
 workflow = aigc.AigcWorkflow(params)
 
