@@ -95,7 +95,7 @@ class AigcWorkflow:
 
     def __createPipeline(self, style):
         print("******* create pipeline for style {}".format(style))
-        modelMap = AigcBase.modelMap
+        modelMap = AigcWorkflow.modelMap
         if not style in modelMap:
             print("invalid style: " + style)
             print("fallback to use anything (cartoon)")
