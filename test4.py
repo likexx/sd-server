@@ -11,19 +11,19 @@ params = aigc.AigcParam(
 # Create a vibrant, full-color anime-style illustration that captures an epic moment of a battle scene. The image should feature two male characters engaged in a powerful showdown. The first character is a super saiya warrior and he is launching a spinning move with a torrent of swirling energy emanating from their fist, their hair and clothing whipped up by the force of their attack. This energy creates a dynamic spiral pattern that dominates the battlefield. The second character is on the defensive, skillfully dodging the attack, their expression one of focused concentration. Bright, vivid colors should highlight the energy and motion, with electric blues and fiery oranges to suggest a high-energy impact. The background should be a blurred whirl of colors that give a sense of rapid movement, with sharp speed lines that emphasize the swift action. The scene is set outdoors, with hints of a grassy field and a clear sky that contrast with the intense action at the forefront.
 # ''',
     prompt= '''
-Create a vibrant, full-color anime-style illustration of a powerful male super saiya fighter with long golden hair experiencing a moment of intense transformation or energy release. The male super saiya fighter with long golden hair is in the center of the composition, eye opening, with a close-up on their face showing a serene yet focused expression. The character is male. The character's hair is in golden color, styled in large, upward-spiking tufts that resemble flames and should be colored with a gradient of fiery shades. Energy lines and light rays emanate from the character, radiating outwards in a burst of brilliant light. The energy effect should include a spectrum of bright colors like electric blue, intense yellow, and white at the center, signifying a powerful surge of energy. The character's skin should glow with a soft light, contrasting with the bright background, illustrating the epicenter of the power release.
+Imagine a full-color anime-style illustration that captures an intense moment of impact. Extreme Long Shot. From a distance, we see a male super saiya fighter with golden long hair at the center of a powerful explosion, with debris and energy particles flying outwards. The character is in a dynamic pose, possibly crouched or bracing against the shockwave. The explosion radiates a bright spectrum of colors, with the center being the brightest, featuring whites and yellows, and the outer edges transitioning into fiery reds and oranges, then cool blues and purples to convey the immense energy. The character, although smaller in the frame due to the distant view, is detailed with vibrant colors that contrast against the explosion, with their hair and clothes affected by the blast force. The background should depict a battle-worn landscape, further enhancing the scale of the explosion and the distance of the viewpoint.
 ''',
     style='cartoon2', 
     steps=50,
-    numImages=4,
+    numImages=8,
     seed=12,
     deviceType='cuda')
-params.image = img_util.convert_image_to_base64('./input/p8.png')
+params.image = img_util.convert_image_to_base64('./input/p16.png')
 
 workflow = aigc.AigcWorkflow(params)
 
 images = workflow.generate()
-i=30001
+i=31001
 for img in images:
     imgBase64Data = img['base64_data']
     processedImage = img_util.add_watermark_to_base64(imgBase64Data, 'created by comicx.ai')
