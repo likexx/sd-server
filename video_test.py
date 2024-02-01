@@ -14,11 +14,9 @@ pipe = StableVideoDiffusionPipeline.from_pretrained(
     use_safetensors=True, safety_checker = None, requires_safety_checker = False
 )
 #pipe.enable_model_cpu_offload()
-pipe.to('cpu') # Force to GPU
+pipe = pipe.to('cuda') # Force to GPU
 
 # Load the conditioning image
-image = load_image("./output/3704.png")
-image = image.resize((512, 288))
 
 generator = torch.manual_seed(32)
 
@@ -31,14 +29,24 @@ num_frames = 10
 motion_bucket_id=180
 noise_aug_strength = 0.3
 
-frames = pipe(image, 
-              decode_chunk_size=decode_chunk_size, 
-              generator=generator,
-              motion_bucket_id=180,
-              noise_aug_strength=0.1).frames[0]
+images = [
+    '01','02','03','04','05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17'
+]
 
-print("generating frames done. export")
+for img_name in images:
+    image_path = '/home/likezhang/temp/asset/{}.png'.format(img_name)
+    image = load_image(image_path)
+    image = image.resize((512, 288))
 
-export_to_video(frames, "./output/generated-6.mp4", fps=7)
+    frames = pipe(image, 
+                decode_chunk_size=decode_chunk_size, 
+                generator=generator,
+                motion_bucket_id=180,
+                noise_aug_strength=0.1).frames[0]
+    output_path = "./output/generated-{}.mp4".format(img_name)
 
-print("done")
+    print("generating frames done. export " + output_path)
+
+    export_to_video(frames, output_path, fps=7)
+
+    print("done")
