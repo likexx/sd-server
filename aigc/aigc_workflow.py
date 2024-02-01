@@ -134,6 +134,7 @@ class AigcWorkflow:
             txt2ImagePipeline = txt2ImagePipeline.to(self.deviceType)
 
         if img2imgPipeline:
+            print('convert pipeline to {}'.format(self.deviceType))
             img2imgPipeline = img2imgPipeline.to(self.deviceType)
 
         return [txt2ImagePipeline, img2imgPipeline]
