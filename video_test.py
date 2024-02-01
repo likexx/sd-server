@@ -13,16 +13,16 @@ pipe = StableVideoDiffusionPipeline.from_pretrained(
     "stabilityai/stable-video-diffusion-img2vid-xt", variant="fp16",
     use_safetensors=True, safety_checker = None, requires_safety_checker = False
 )
-#pipe.enable_model_cpu_offload()
 pipe = pipe.to('cuda') # Force to GPU
+pipe.enable_model_cpu_offload()
 
 # Load the conditioning image
 
 generator = torch.manual_seed(32)
 
 # Perform GPU memory cleanup
-# gc.collect()
-# torch.cuda.empty_cache()
+gc.collect()
+torch.cuda.empty_cache()
 
 decode_chunk_size = 2
 num_frames = 10
