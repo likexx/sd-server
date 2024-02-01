@@ -2,6 +2,7 @@ import torch
 from diffusers import StableVideoDiffusionPipeline
 from diffusers.utils import load_image, export_to_video
 from diffusers.pipelines.stable_diffusion import safety_checker
+import gc
 
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
@@ -17,11 +18,10 @@ pipe = StableVideoDiffusionPipeline.from_pretrained(
 pipe.enable_model_cpu_offload()
 
 # Load the conditioning image
-
 generator = torch.manual_seed(32)
 
 # Perform GPU memory cleanup
-# gc.collect()
+gc.collect()
 torch.cuda.empty_cache()
 
 decode_chunk_size = 2
