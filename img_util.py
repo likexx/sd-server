@@ -115,3 +115,8 @@ def saveBase64toPNG(imageData, outputFilePath):
     with open(outputFilePath, 'wb') as file:
         file.write(decodedImageData)
     print("saved to {}".format(outputFilePath))
+
+def convert_image_to_base64(file_path):
+    with open(file_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read())
+        return encoded_string.decode('utf-8')

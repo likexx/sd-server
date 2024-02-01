@@ -6,3 +6,5 @@ invisible_watermark
 transformers
 accelerate 
 safetensors
+openai
+compel

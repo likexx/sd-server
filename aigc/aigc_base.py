@@ -5,6 +5,7 @@ import torch
 from diffusers import StableDiffusionPipeline, StableDiffusionImg2ImgPipeline, AutoPipelineForText2Image, AutoPipelineForImage2Image
 from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipeline, DiffusionPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
+from compel import Compel, ReturnedEmbeddingsType
 
 from . import aigc_base, models
 
@@ -12,7 +13,7 @@ from . import aigc_base, models
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
 
-class AigcBase:
+class AigcWorkflow:
     modelMap = models.MODELS
 
     def __init__(self, params):
@@ -25,6 +26,7 @@ class AigcBase:
         self.imageWidth = params.imageWidth
         self.style = params.style
         self.seed = params.seed
+        self.deviceType = params.deviceType
 
     def __loadFromExistingModels(self, model, requireSafetyChecker):
         if not requireSafetyChecker:
@@ -128,10 +130,32 @@ class AigcBase:
         return [pipeline, img2imgPipeline]
 
     def __configPiplelines(self, txt2ImagePipeline, img2imgPipeline):
-        pass
+        if txt2ImagePipeline:
+            txt2ImagePipeline.to(self.deviceType)
+
+        if img2imgPipeline:
+            img2imgPipeline.to(self.deviceType)
+
+        return [txt2ImagePipeline, img2imgPipeline]
 
     def __createGenerator(self):
-        pass
+        if self.seed != None:
+            print("using generator seed: {}".format(self.seed))
+            generator = torch.Generator(self.deviceType).manual_seed(self.seed)
+            return generator
+        return None
+
+    def __createWeightedPrompt(self, compel_config_id, pipeline, prompt):
+        if compel_config_id != '2' :
+            compel = Compel(tokenizer=pipeline.tokenizer, text_encoder=pipeline.text_encoder)
+            return [compel([prompt]), None]
+        else:
+            compel = Compel(tokenizer=[pipeline.tokenizer, pipeline.tokenizer_2] , 
+                            text_encoder=[pipeline.text_encoder, pipeline.text_encoder_2], 
+                            returned_embeddings_type=ReturnedEmbeddingsType.PENULTIMATE_HIDDEN_STATES_NON_NORMALIZED, 
+                            requires_pooled=[False, True])
+            return compel(prompt)
+
     
     def generate(self):
         result = []
@@ -152,9 +176,14 @@ class AigcBase:
         
         generator = self.__createGenerator()
 
+        prompt_embeds, pooled = self.__createWeightedPrompt(compel_config_id=modelConfig.get('compel', '1'), pipeline=txt2imgPipeline, prompt=enhancedPrompt)
+
         if not self.image or not img2imgPipeline:
             print("generate with txt2img")
-            images = txt2imgPipeline(enhancedPrompt,
+
+            images = txt2imgPipeline(
+                                prompt_embeds = prompt_embeds,
+                                pooled_prompt_embeds = pooled,
                                 negative_prompt=self.negPrompt,
                                 num_images_per_prompt=self.numImages,
                                 num_inference_steps=self.steps,
@@ -165,7 +194,9 @@ class AigcBase:
             print("generate with img2img")
             init_image = self.__base64ToRGB(self.image)
             init_image = init_image.resize((self.imageWidth, self.imageHeight))
-            images = img2imgPipeline(enhancedPrompt,
+            images = img2imgPipeline(
+                                    prompt_embeds = prompt_embeds,
+                                    pooled_prompt_embeds = pooled,
                                     image=init_image,
                                     negative_prompt=self.negPrompt,
                                     num_images_per_prompt=self.numImages,

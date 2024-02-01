@@ -32,13 +32,13 @@ MODELS = {
     "cartoon": { "model": localAnythingAndEverythingPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
     "cartoon-adult": { "model": localAnythingAndEverythingPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
 
-    "real": {"model": stableDiffuxionXL, "pipeline_type": "auto", "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION},
+    "real": {"model": stableDiffuxionXL, "compel": "2", "pipeline_type": "auto", "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION},
     "real-adult": {"model": hardcoreAsianPornPath, "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION },
 
-    "turbo": {"model": stableDiffuxionTurbo, "pipeline_type": "auto", "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION},
-    "turbo-cartoon": {"model": stableDiffuxionTurbo, "pipeline_type": "auto", "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION},
+    "turbo": {"model": stableDiffuxionTurbo, "compel": "2", "pipeline_type": "auto", "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION},
+    "turbo-cartoon": {"model": stableDiffuxionTurbo, "compel": "2", "pipeline_type": "auto", "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION},
 
-    "cartoon2": { "model": stableDiffuxionXL, "pipeline_type": "auto", "nsfw": False,  "prompts": CARTOON_PROMPT_SUGGESTION },
+    "cartoon2": { "model": hardcoreHentaiPath, "nsfw": False,  "prompts": CARTOON_PROMPT_SUGGESTION },
     "cartoon2-nsfw": { "model": hardcoreHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
 
     "anim-porn": { "model": grapfruitHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION }
