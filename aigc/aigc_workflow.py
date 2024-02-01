@@ -7,7 +7,7 @@ from diffusers import StableDiffusionXLPipeline, StableDiffusionXLImg2ImgPipelin
 from diffusers.pipelines.stable_diffusion import safety_checker
 from compel import Compel, ReturnedEmbeddingsType
 
-from . import aigc_base, models
+from . import aigc_workflow, models
 
 
 def remove_nsfw_check(self, clip_input, images) :
