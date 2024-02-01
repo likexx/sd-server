@@ -174,6 +174,7 @@ class AigcWorkflow:
                 enhancedPrompt += "," + w
 
         txt2imgPipeline, img2imgPipeline = self.__createPipeline(self.style)
+        txt2imgPipeline, img2imgPipeline = self.__configPiplelines(txt2imgPipeline, img2imgPipeline)
         
         generator = self.__createGenerator()
 
