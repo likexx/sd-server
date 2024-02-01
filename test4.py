@@ -17,12 +17,12 @@ Create a vibrant, full-color anime-style illustration of a powerful super saiya 
     steps=50,
     numImages=4,
     seed=12,
-    deviceType='cuda')
+    deviceType='cpu')
 params.image = img_util.convert_image_to_base64('./input/p8.png')
 
-client = aigc.AigcWorkflow(params)
+workflow = aigc.AigcWorkflow(params)
 
-images = client.generate()
+images = workflow.generate()
 i=30001
 for img in images:
     imgBase64Data = img['base64_data']
