@@ -34,7 +34,7 @@ def add_watermark(input_image, watermark_text):
     # Get image size
     width, height = image.size
 
-    textSize = width/30
+    textSize = width//30
 
     # Prepare to draw the watermark with default font
     transparent = Image.new('RGBA', image.size, (255, 255, 255, 0))
