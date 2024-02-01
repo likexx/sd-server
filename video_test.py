@@ -22,7 +22,7 @@ generator = torch.manual_seed(32)
 
 # Perform GPU memory cleanup
 # gc.collect()
-# torch.cuda.empty_cache()
+torch.cuda.empty_cache()
 
 decode_chunk_size = 2
 num_frames = 10
