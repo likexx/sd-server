@@ -13,7 +13,7 @@ pipe = StableVideoDiffusionPipeline.from_pretrained(
     "stabilityai/stable-video-diffusion-img2vid-xt", variant="fp16",
     use_safetensors=True, safety_checker = None, requires_safety_checker = False
 )
-pipe = pipe.to('cuda') # Force to GPU
+# pipe = pipe.to('cuda') # Force to GPU
 pipe.enable_model_cpu_offload()
 
 # Load the conditioning image
