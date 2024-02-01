@@ -11,7 +11,7 @@ def remove_nsfw_check(self, clip_input, images) :
 safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 
 pipe = StableVideoDiffusionPipeline.from_pretrained(
-    "stabilityai/stable-video-diffusion-img2vid-xt", variant="fp16",
+    "stabilityai/stable-video-diffusion-img2vid", variant="fp16",
     use_safetensors=True, safety_checker = None, requires_safety_checker = False
 )
 # pipe = pipe.to('cuda') # Force to GPU
