@@ -11,7 +11,7 @@ params = aigc.AigcParam(
 # Create a vibrant, full-color anime-style illustration that captures an epic moment of a battle scene. The image should feature two male characters engaged in a powerful showdown. The first character is a super saiya warrior and he is launching a spinning move with a torrent of swirling energy emanating from their fist, their hair and clothing whipped up by the force of their attack. This energy creates a dynamic spiral pattern that dominates the battlefield. The second character is on the defensive, skillfully dodging the attack, their expression one of focused concentration. Bright, vivid colors should highlight the energy and motion, with electric blues and fiery oranges to suggest a high-energy impact. The background should be a blurred whirl of colors that give a sense of rapid movement, with sharp speed lines that emphasize the swift action. The scene is set outdoors, with hints of a grassy field and a clear sky that contrast with the intense action at the forefront.
 # ''',
     prompt= '''
-A male super saiyan fighter is flying with arms straightened, long golden hair, surrounded by lightenings and bolts, speed lines around, long shot, view from aside, view from far distance.
+A male super saiyan fighter is flying from left to right with arms straightened, the character body is straightened horizontally and facing downward, view from aside, long golden hair, surrounded by lightenings and bolts, speed lines around, extreme long shot, view from aside, view from far distance.
 ''',
     style='cartoon2', 
     steps=50,
