@@ -21,8 +21,8 @@ pipe.enable_model_cpu_offload()
 generator = torch.manual_seed(32)
 
 # Perform GPU memory cleanup
-gc.collect()
-torch.cuda.empty_cache()
+# gc.collect()
+# torch.cuda.empty_cache()
 
 decode_chunk_size = 2
 num_frames = 10
