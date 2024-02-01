@@ -131,10 +131,10 @@ class AigcWorkflow:
 
     def __configPiplelines(self, txt2ImagePipeline, img2imgPipeline):
         if txt2ImagePipeline:
-            txt2ImagePipeline.to(self.deviceType)
+            txt2ImagePipeline = txt2ImagePipeline.to(self.deviceType)
 
         if img2imgPipeline:
-            img2imgPipeline.to(self.deviceType)
+            img2imgPipeline = img2imgPipeline.to(self.deviceType)
 
         return [txt2ImagePipeline, img2imgPipeline]
 
