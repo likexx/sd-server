@@ -23,7 +23,7 @@ frame_count = 8
 pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 # model_id = "runwayml/stable-diffusion-v1-5"
-model_id = "./anythingAnd_anythingAndEverything.safetensors"
+model_id = "anything.safetensors"
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-openpose", torch_dtype=torch.float16)
 pipe = StableDiffusionControlNetPipeline.from_pretrained(
     model_id, controlnet=controlnet, torch_dtype=torch.float16
