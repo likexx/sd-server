@@ -30,7 +30,7 @@ seed = 0
 video_length = 24  #24 ÷ 4fps = 6 seconds
 chunk_size = 8
 prompt = '''
-1 girl, single frame. one girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
+1 girl, single frame. one girl is crunching on the bed and raising her ass high. she is being fucked, moving her waist up and down. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt])
@@ -46,7 +46,7 @@ for i in range(len(chunk_ids)):
     frame_ids = [0] + list(range(ch_start, ch_end))
     # Fix the seed for the temporal consistency
     generator.manual_seed(seed)
-    output = pipe(prompt = prompt, video_length=len(frame_ids), generator=generator, width=256, height=256, num_inference_steps=100, frame_ids=frame_ids)
+    output = pipe(prompt = weighted_prompt, video_length=len(frame_ids), generator=generator, width=256, height=256, num_inference_steps=100, frame_ids=frame_ids)
     result.append(output.images[1:])
 
 # Concatenate chunks and save
