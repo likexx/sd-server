@@ -20,32 +20,30 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 # video_path = hf_hub_download(repo_type="space", repo_id=repo_id, filename=filename)
 # print(video_path)
 
-reader = imageio.get_reader('./input/test01.mp4', "ffmpeg")
-frame_count = 30*15
-pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
+# reader = imageio.get_reader('./input/test01.mp4', "ffmpeg")
+# frame_count = 30*15
+# pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 edges = []
 
 i = 1
 j = 0
-for img in pose_images:
-    if i%30 != 0:
-        i+=1
-        continue
+for i in range(1, 10):
+    img = Image.open('./input/pose{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
     # img.save("./input/pose_{}.png".format(j), 'PNG')
     data = np.array(img)
-    edge = cv2.Canny(data, 50, 100)
+    edge = cv2.Canny(data, 50, 50)
     edge = edge[:, :, None]
     edge = np.concatenate([edge, edge, edge], axis=2)
     edge = Image.fromarray(edge)
     edge.save("./input/pose_{}.png".format(j), 'PNG')
     edges.append(edge)
-    i+=1
-    j+=1
-    if j > 10:
-        break
+    # i+=1
+    # j+=1
+    # if j > 10:
+    #     break
 
 
 
