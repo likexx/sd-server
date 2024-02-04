@@ -62,7 +62,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 # fix latents for all frames
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
-prompt = "a naked chinese female girl is crunching on the bed and being fucked from behind"
-result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents).images
+prompt = "a naked chinese female girl is crunching on the bed and being fucked from behind, vivid, colorful, masterpiece, high quality, vibrant colors, details"
+result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=100).images
 imageio.mimsave("video.mp4", result, fps=4)
 
