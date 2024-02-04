@@ -20,26 +20,40 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 # video_path = hf_hub_download(repo_type="space", repo_id=repo_id, filename=filename)
 # print(video_path)
 
-# reader = imageio.get_reader('./input/test01.mp4', "ffmpeg")
-# frame_count = 30*15
+# reader = imageio.get_reader('./input/tt3.mp4', "ffmpeg")
+# frame_count = 30*10
 # pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 edges = []
 
-i = 1
-j = 0
-for i in range(1, 10):
-    img = Image.open('./input/pp{}.png'.format(i))
+# i = 1
+# j = 0
+# for img in pose_images:
+#     print(i)
+#     img = img.resize((512, 512))
+#     # img.save("./input/pose_{}.png".format(j), 'PNG')
+#     data = np.array(img)
+#     edge = cv2.Canny(data, 100, 300)
+#     edge = edge[:, :, None]
+#     edge = np.concatenate([edge, edge, edge], axis=2)
+#     edge = Image.fromarray(edge)
+#     edge.save("./output/tt3_pose_{}.png".format(i), 'PNG')
+#     # edges.append(edge)
+#     i+=1    
+
+for i in range(244, 244+10):
+    img = Image.open('./input/tt3_pose_{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
+    edges.append(img)
     # img.save("./input/pose_{}.png".format(j), 'PNG')
-    data = np.array(img)
-    edge = cv2.Canny(data, 50, 50)
-    edge = edge[:, :, None]
-    edge = np.concatenate([edge, edge, edge], axis=2)
-    edge = Image.fromarray(edge)
-    edge.save("./input/pose_{}.png".format(j), 'PNG')
-    edges.append(edge)
+    # data = np.array(img)
+    # edge = cv2.Canny(data, 50, 50)
+    # edge = edge[:, :, None]
+    # edge = np.concatenate([edge, edge, edge], axis=2)
+    # edge = Image.fromarray(edge)
+    # edge.save("./input/pose_{}.png".format(j), 'PNG')
+    # edges.append(edge)
     # i+=1
     # j+=1
     # if j > 10:
@@ -62,7 +76,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 # fix latents for all frames
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
-prompt = "a naked chinese female girl is crunching on the bed and being fucked from behind, view from aside, girl is raiing her ass, facing downward, legs wide open, vivid, colorful, masterpiece, high quality, vibrant colors, details"
+prompt = "two male warriors are fighting. The character on the right side is a super saiyan warrior with golden hair. The character on the left has green skin with black dots. They are fighting in the sky. view from aside, long shot. master piece, details, vivid color, colorful, vivid, masterpiece."
 result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=100).images
 imageio.mimsave("video.mp4", result, fps=4)
 
