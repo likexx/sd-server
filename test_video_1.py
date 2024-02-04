@@ -33,6 +33,7 @@ for img in pose_images:
         i+=1
         continue
     print(img.size)
+    img = img.resize((512, 512))
     # img.save("./input/pose_{}.png".format(j), 'PNG')
     data = np.array(img)
     edge = cv2.Canny(data, 50, 100)
