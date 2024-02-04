@@ -33,8 +33,13 @@ chunk_size = 8
 prompt = '''
 1 girl, single frame. one girl is crunching on the bed and moving her ass. she is being fucked, moving her waist up and down. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
-compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
-weighted_prompt = compel([prompt])
+# compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
+compel = Compel(tokenizer=[pipe.tokenizer, pipe.tokenizer_2] , 
+                text_encoder=[pipe.text_encoder, pipe.text_encoder_2], 
+                returned_embeddings_type=ReturnedEmbeddingsType.PENULTIMATE_HIDDEN_STATES_NON_NORMALIZED, 
+                requires_pooled=[False, True])
+
+weighted_prompt, pooled = compel([prompt])
 
 result = []
 chunk_ids = np.arange(0, video_length, chunk_size - 1)
@@ -50,6 +55,7 @@ for i in range(len(chunk_ids)):
     output = pipe(
                   prompt = None,
                   prompt_embeds = weighted_prompt, 
+                  pooled_prompt_embeds = pooled,
                   video_length=len(frame_ids), 
                   generator=generator, width=256, height=256, 
                   motion_field_strength_x = 0,
