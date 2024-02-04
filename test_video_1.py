@@ -78,7 +78,8 @@ pipe.unet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 
 # fix latents for all frames
-latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
+# 32 for 256x256. should be 64 for size 512x512
+latents = torch.randn((1, 4, 32, 32), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
 prompt = '''
 1 girl, single frame. one girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
