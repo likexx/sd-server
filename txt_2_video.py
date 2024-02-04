@@ -48,6 +48,7 @@ for i in range(len(chunk_ids)):
     # Fix the seed for the temporal consistency
     generator.manual_seed(seed)
     output = pipe(
+                  prompt = None,
                   prompt_embeds = weighted_prompt, 
                   video_length=len(frame_ids), 
                   generator=generator, width=256, height=256, 
