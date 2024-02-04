@@ -23,10 +23,10 @@ frame_count = 8
 pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 # model_id = "runwayml/stable-diffusion-v1-5"
-model_id = "anything.safetensors"
+model_id = "/home/likezhang/anything.safetensors"
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-openpose", torch_dtype=torch.float16)
-pipe = StableDiffusionControlNetPipeline.from_pretrained(
-    model_id, controlnet=controlnet, torch_dtype=torch.float16
+pipe = StableDiffusionControlNetPipeline.from_single_file(
+    model_id, controlnet=controlnet, torch_dtype=torch.float16, safety_checker=None, use_safetensors=True
 ).to("cuda")
 
 # Set the attention processor
