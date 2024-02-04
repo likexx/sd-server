@@ -41,13 +41,8 @@ edges = []
 #     # edges.append(edge)
 #     i+=1    
 
-count = 0
-for i in range(244, 285):
-    if count%4 != 0:
-        count+=1
-        continue
-    count+=1
-    img = Image.open('./input/tt3_pose_{}.png'.format(i))
+for i in range(1, 9):
+    img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
     edges.append(img)
@@ -81,7 +76,9 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 # fix latents for all frames
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
-prompt = "two male warriors are fighting. The character on the right side is a super saiyan warrior with golden hair. the man on the left has green skin with black dots. They are fighting in the blue sky. view from aside, long shot. master piece, details, vivid color, colorful, vivid, masterpiece."
+prompt = '''
+a chinese girl is crunching on the bed, all naked, raising her ass high, kneeing on the bed, slim waist, beautiful legs,long black hair, legs slightly open, being fucked from behind, master piece, detailed, vivid, colorful, masterpiece, high quality
+'''
 result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=100).images
-imageio.mimsave("video.mp4", result, fps=4)
+imageio.mimsave("video-1.mp4", result, fps=4)
 
