@@ -3,7 +3,7 @@ from PIL import Image
 import imageio
 import torch
 import numpy as np
-from diffusers import TextToVideoZeroPipeline, TextToVideoSDPipeline
+from diffusers import TextToVideoZeroPipeline, TextToVideoSDPipeline, DiffusionPipeline
 from diffusers.pipelines.text_to_video_synthesis.pipeline_text_to_video_zero import CrossFrameAttnProcessor
 from diffusers.pipelines.stable_diffusion import safety_checker
 import cv2
@@ -21,7 +21,7 @@ model_name = sys.argv[1]
 print("using model: " +model_name)
 model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
 
-pipe = TextToVideoSDPipeline.from_single_file(
+pipe = DiffusionPipeline.from_single_file(
     model_id, 
     torch_dtype=torch.float16, 
     safety_checker=None, 
