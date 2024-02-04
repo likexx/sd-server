@@ -79,7 +79,7 @@ latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat
 prompt = '''
 1 girl, single frame. one girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
-compel = Compel(tokenizer=pipeline.tokenizer, text_encoder=pipeline.text_encoder)
+compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt])
 result = pipe(prompt_embeds=[weighted_prompt] * len(edges), pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=50).images
 imageio.mimsave("video-1.mp4", result, fps=4)
