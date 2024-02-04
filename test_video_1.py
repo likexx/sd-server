@@ -7,7 +7,7 @@ from diffusers import StableDiffusionControlNetPipeline, ControlNetModel
 from diffusers.pipelines.text_to_video_synthesis.pipeline_text_to_video_zero import CrossFrameAttnProcessor
 from diffusers.pipelines.stable_diffusion import safety_checker
 import cv2
-
+from compel import Compel, ReturnedEmbeddingsType
 
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
@@ -79,6 +79,8 @@ latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat
 prompt = '''
 1 girl, single frame. one girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
-result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=50).images
+compel = Compel(tokenizer=pipeline.tokenizer, text_encoder=pipeline.text_encoder)
+weighted_prompt = compel([prompt])
+result = pipe(prompt_embeds=[weighted_prompt] * len(edges), pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=50).images
 imageio.mimsave("video-1.mp4", result, fps=4)
 
