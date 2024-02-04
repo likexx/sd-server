@@ -4,7 +4,14 @@ import imageio
 import torch
 from diffusers import StableDiffusionControlNetPipeline, ControlNetModel
 from diffusers.pipelines.text_to_video_synthesis.pipeline_text_to_video_zero import CrossFrameAttnProcessor
+from diffusers.pipelines.stable_diffusion import safety_checker
 
+
+def remove_nsfw_check(self, clip_input, images) :
+    return images, [False for i in images]
+
+
+safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 
 filename = "__assets__/poses_skeleton_gifs/dance1_corr.mp4"
 repo_id = "PAIR/Text2Video-Zero"
