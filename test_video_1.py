@@ -77,7 +77,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
 prompt = '''
-1 girl. one chinese girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
+1 girl, single frame. one girl is crunching on the bed and raising her ass high. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
 result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=50).images
 imageio.mimsave("video-1.mp4", result, fps=4)
