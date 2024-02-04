@@ -60,7 +60,7 @@ for i in range(1, 9):
     # if j > 10:
     #     break
 edges = edges + edges[::-1]
-
+edges = edges[:12]
 
 
 
