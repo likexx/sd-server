@@ -3,7 +3,7 @@ from PIL import Image
 import imageio
 import torch
 import numpy as np
-from diffusers import TextToVideoZeroPipeline
+from diffusers import TextToVideoZeroPipeline, TextToVideoZeroSDXLPipeline
 from diffusers.pipelines.stable_diffusion import safety_checker
 import cv2
 from compel import Compel, ReturnedEmbeddingsType
@@ -19,8 +19,9 @@ model_name = sys.argv[1]
 print("using model: " +model_name)
 # model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
 model_id = "stablediffusionapi/anything-v5"
+model_id = "stabilityai/stable-diffusion-xl-base-1.0"
 
-pipe = TextToVideoZeroPipeline.from_pretrained(
+pipe = TextToVideoZeroSDXLPipeline.from_pretrained(
     model_id, 
     torch_dtype=torch.float16, 
     safety_checker=None, 
@@ -46,7 +47,13 @@ for i in range(len(chunk_ids)):
     frame_ids = [0] + list(range(ch_start, ch_end))
     # Fix the seed for the temporal consistency
     generator.manual_seed(seed)
-    output = pipe(prompt = prompt, video_length=len(frame_ids), generator=generator, width=256, height=256, num_inference_steps=100, frame_ids=frame_ids)
+    output = pipe(prompt_embeds = weighted_prompt, 
+                  video_length=len(frame_ids), 
+                  generator=generator, width=256, height=256, 
+                  motion_field_strength_x = 0,
+                  motion_field_strength_y = 0,
+                  num_inference_steps=100, 
+                  frame_ids=frame_ids)
     result.append(output.images[1:])
 
 # Concatenate chunks and save
