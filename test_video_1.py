@@ -8,6 +8,7 @@ from diffusers.pipelines.text_to_video_synthesis.pipeline_text_to_video_zero imp
 from diffusers.pipelines.stable_diffusion import safety_checker
 import cv2
 from compel import Compel, ReturnedEmbeddingsType
+import sys
 
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
@@ -63,7 +64,9 @@ for i in range(1, 9):
 
 
 # model_id = "runwayml/stable-diffusion-v1-5"
-model_id = "/home/likezhang/models/hardcore.safetensors"
+model_name = sys.argv[1]
+print("using model: " +model_name)
+model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-hed", torch_dtype=torch.float16)
 pipe = StableDiffusionControlNetPipeline.from_single_file(
     model_id, controlnet=controlnet, torch_dtype=torch.float16, safety_checker=None, use_safetensors=True
@@ -81,6 +84,6 @@ prompt = '''
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=50).images
+result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=100).images
 imageio.mimsave("video-1.mp4", result, fps=4)
 
