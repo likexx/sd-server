@@ -44,6 +44,8 @@ for img in pose_images:
     edges.append(edge)
     i+=1
     j+=1
+    if j > 10:
+        break
 
 
 
