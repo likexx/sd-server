@@ -63,7 +63,7 @@ for i in range(1, 9):
 
 
 # model_id = "runwayml/stable-diffusion-v1-5"
-model_id = "/home/likezhang/anything.safetensors"
+model_id = "/home/likezhang/models/anything.safetensors"
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-openpose", torch_dtype=torch.float16)
 pipe = StableDiffusionControlNetPipeline.from_single_file(
     model_id, controlnet=controlnet, torch_dtype=torch.float16, safety_checker=None, use_safetensors=True
