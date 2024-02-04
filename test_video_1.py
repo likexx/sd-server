@@ -45,7 +45,7 @@ edges = []
 for i in range(1, 9):
     img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
-    img = img.resize((512, 512))
+    img = img.resize((256, 256))
     edges.append(img)
     # img.save("./input/pose_{}.png".format(j), 'PNG')
     # data = np.array(img)
@@ -60,7 +60,7 @@ for i in range(1, 9):
     # if j > 10:
     #     break
 edges = edges + edges[::-1]
-edges = edges[:12]
+# edges = edges[:12]
 
 
 
@@ -85,6 +85,6 @@ prompt = '''
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=100).images
+result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, width=256, height=256, num_inference_steps=100).images
 imageio.mimsave("video-1.mp4", result, fps=8)
 
