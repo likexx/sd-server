@@ -8,3 +8,5 @@ accelerate
 safetensors
 openai
 compel
+imageio-ffmpeg
+imageio-pyav
