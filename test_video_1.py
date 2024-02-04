@@ -29,7 +29,7 @@ edges = []
 i = 1
 j = 0
 for i in range(1, 10):
-    img = Image.open('./input/pose{}.png'.format(i))
+    img = Image.open('./input/pp{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
     # img.save("./input/pose_{}.png".format(j), 'PNG')
