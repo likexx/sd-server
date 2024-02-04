@@ -28,7 +28,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 # fix latents for all frames
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(pose_images), 1, 1, 1)
 
-prompt = "Darth Vader dancing in a desert"
+prompt = "a naked chinese female girl is dancing on a beach"
 result = pipe(prompt=[prompt] * len(pose_images), image=pose_images, latents=latents).images
 imageio.mimsave("video.mp4", result, fps=4)
 
