@@ -59,6 +59,7 @@ for i in range(1, 9):
     # j+=1
     # if j > 10:
     #     break
+edges = edges + edges[::-1]
 
 
 
@@ -85,5 +86,5 @@ prompt = '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, num_inference_steps=100).images
-imageio.mimsave("video-1.mp4", result, fps=4)
+imageio.mimsave("video-1.mp4", result, fps=8)
 
