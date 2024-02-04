@@ -41,7 +41,12 @@ edges = []
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(244, 244+10):
+count = 0
+for i in range(244, 285):
+    if count%4 != 0:
+        count+=1
+        continue
+    count+=1
     img = Image.open('./input/tt3_pose_{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
@@ -76,7 +81,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 # fix latents for all frames
 latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
-prompt = "two male warriors are fighting. The character on the right side is a super saiyan warrior with golden hair. The character on the left has green skin with black dots. They are fighting in the sky. view from aside, long shot. master piece, details, vivid color, colorful, vivid, masterpiece."
+prompt = "two male warriors are fighting. The character on the right side is a super saiyan warrior with golden hair. the man on the left has green skin with black dots. They are fighting in the blue sky. view from aside, long shot. master piece, details, vivid color, colorful, vivid, masterpiece."
 result = pipe(prompt=[prompt] * len(edges), image=edges, latents=latents, num_inference_steps=100).images
 imageio.mimsave("video.mp4", result, fps=4)
 
