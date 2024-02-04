@@ -18,7 +18,7 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 model_name = sys.argv[1]
 print("using model: " +model_name)
 # model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
-model_id = "anything-v5"
+model_id = "stablediffusionapi/anything-v5"
 
 pipe = TextToVideoZeroPipeline.from_pretrained(
     model_id, 
