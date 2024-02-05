@@ -118,5 +118,5 @@ result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None,
               image=edges, latents=latents, width=size, height=size, num_inference_steps=steps,
               generator = generator,
               controlnet_conditioning_scale = controlnet_scale).images
-imageio.mimsave("video-1.mp4", result, fps=FPS)
+imageio.mimsave("video-1.mp4", result + result[::-1], fps=FPS)
 
