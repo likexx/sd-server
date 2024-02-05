@@ -26,7 +26,7 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 # pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 edges = []
-size = 256
+size = 512
 FPS = 4
 # i = 1
 # j = 0
@@ -43,7 +43,7 @@ FPS = 4
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(1, 21):
+for i in range(1, 13):
     img = Image.open('../hed/hed_{}.png'.format(i))
     print(img.size)
     img = img.resize((size, size))
