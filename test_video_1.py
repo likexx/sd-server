@@ -42,7 +42,7 @@ edges = []
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(1, 3):
+for i in range(1, 5):
     img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
     img = img.resize((256, 256))
@@ -79,7 +79,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 
 # fix latents for all frames
 # 32 for 256x256. should be 64 for size 512x512
-latents = torch.randn((1, 4, 128, 128), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
+latents = torch.randn((1, 4, 96, 96), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
 prompt = '''
 1 girl, an ancient chinese girl in Song dynasty is crunching on the bed and raising her ass high. view from aside, long shot. The character has beautiful face, round eyes, and long hair. She is screaming. She is wearing white classic chinese dress, half naked, large breast, legs naked and vagina exposed, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind.beautiful face, face details, master piece, detailed, vivid, colorful, masterpiece, high quality
@@ -94,6 +94,6 @@ weighted_prompt = compel([prompt] * len(edges))
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=1024, height=1024, num_inference_steps=50).images
-imageio.mimsave("video-1.mp4", result, fps=2)
+              image=edges, latents=latents, width=768, height=768, num_inference_steps=50).images
+imageio.mimsave("video-1.mp4", result, fps=4)
 
