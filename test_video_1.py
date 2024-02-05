@@ -66,7 +66,9 @@ for i in range(1, 9):
 
 # model_id = "runwayml/stable-diffusion-v1-5"
 model_name = sys.argv[1]
+controlnet_scale = float(sys.argv[2])
 print("using model: " +model_name)
+print("controlnet scale: {}".format(controlnet_scale))
 model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-hed", torch_dtype=torch.float16)
 pipe = StableDiffusionControlNetPipeline.from_single_file(
@@ -97,6 +99,6 @@ result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None,
               negative_prompt=[neg_prompt]*len(edges),
               image=edges, latents=latents, width=512, height=512, num_inference_steps=100,
               generator = generator,
-              controlnet_conditioning_scale = 0.5).images
+              controlnet_conditioning_scale = controlnet_scale).images
 imageio.mimsave("video-1.mp4", result, fps=8)
 
