@@ -42,7 +42,7 @@ edges = []
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(1, 5):
+for i in range(1, 3):
     img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
     img = img.resize((512, 512))
@@ -95,5 +95,5 @@ weighted_prompt = compel([prompt] * len(edges))
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
               image=edges, latents=latents, width=1024, height=1024, num_inference_steps=50).images
-imageio.mimsave("video-1.mp4", result, fps=4)
+imageio.mimsave("video-1.mp4", result, fps=2)
 
