@@ -7,8 +7,8 @@ import imageio
 from annotator.util import resize_image, HWC3
 from annotator.hed import HEDdetector
 
-reader = imageio.get_reader('./input/test01.mp4', "ffmpeg")
-frame_count = 30*10
+reader = imageio.get_reader('./input/dragonball.mp4', "ffmpeg")
+frame_count = 30*6
 pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 
@@ -17,7 +17,7 @@ apply_hed = HEDdetector()
 i = 0
 j = 0
 for img in pose_images:
-    if i%5!=0:
+    if i%4!=0:
         i+=1
         continue
     # img = Image.open('./input/pose_{}.png'.format(i))
@@ -33,7 +33,7 @@ for img in pose_images:
     print(detected_map.shape)
     output_image = Image.fromarray(detected_map)
     output_image = output_image.resize((512, 512))
-    output_image.save("./output/hed_{}.png".format(j), 'PNG')
+    output_image.save("./output/dragonball_hed_{}.png".format(j), 'PNG')
     i+=1
     j+=1
 
