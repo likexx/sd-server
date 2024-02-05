@@ -30,9 +30,13 @@ pipe = TextToVideoZeroPipeline.from_pretrained(
 seed = 0
 video_length = 24  #24 ÷ 4fps = 6 seconds
 chunk_size = 8
-prompt = '''
-one girl is crunching on the bed and raising her ass upwards, being fucked, kneeing on bed, hands on bed, face downward, view from aside, long shot, master piece, high quality, vivid color, masterpiece, details
+prompt = ['''
+one girl is crunching on the bed and raising her ass upwards, being fucked, kneeing on bed, hands on bed, face downward, view from side, long shot, master piece, high quality, vivid color, masterpiece, details
+''',
 '''
+one girl is crunching on the bed and raising her ass downwards, yelling, being fucked, kneeing on bed, hands on bed, face upward, view from side, long shot, master piece, high quality, vivid color, masterpiece, details
+'''
+]
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt])
 # compel = Compel(tokenizer=[pipe.tokenizer, pipe.tokenizer_2] , 
@@ -54,7 +58,7 @@ for i in range(len(chunk_ids)):
     # Fix the seed for the temporal consistency
     generator.manual_seed(seed)
     output = pipe(
-                  prompt = prompt,
+                  prompt = prompt[i%2],
                   video_length=len(frame_ids), 
                   generator=generator, width=256, height=256, 
                   motion_field_strength_x = 0,
