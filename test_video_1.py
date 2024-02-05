@@ -89,7 +89,7 @@ neg_prompt = '''
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-generator = torch.Generator('cuda').manual_seed(99)
+generator = torch.Generator('cuda').manual_seed(0)
 
 # negative_prompt_embeds
 
