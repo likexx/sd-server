@@ -99,7 +99,7 @@ generator = torch.Generator('cuda').manual_seed(seed)
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=size, height=size, num_inference_steps=50,
+              image=edges, latents=latents, width=size, height=size, num_inference_steps=100,
               generator = generator,
               controlnet_conditioning_scale = controlnet_scale).images
 imageio.mimsave("video-1.mp4", result, fps=FPS)
