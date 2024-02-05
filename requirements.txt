@@ -9,4 +9,4 @@ safetensors
 openai
 compel
 imageio-ffmpeg
-imageio-pyav
+# imageio-pyav
