@@ -89,7 +89,7 @@ latents = torch.randn((1, 4, 32 * (size//256), 32*(size//256)), device="cuda", d
 # 1 girl, an ancient chinese girl in Song dynasty is crunching on the bed and raising her ass high. view from aside, long shot. The character has beautiful face, round eyes, and long hair. She is screaming. She is wearing white classic chinese dress, half naked, large breast, legs naked and vagina exposed, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind.beautiful face, face details, master piece, detailed, vivid, colorful, masterpiece, high quality
 # '''
 prompt = '''
-2 men, 2 male super saiyan warriors are fighting, battle scene
+2 men, 2 male super saiyan warriors are fighting, battle scene, face details, high quality, masterpiece, vivid color, colorful, realistic, photo quality
 '''
 neg_prompt = '''
 (worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed
