@@ -94,6 +94,7 @@ weighted_prompt = compel([prompt] * len(edges))
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=512, height=512, num_inference_steps=50).images
+              image=edges, latents=latents, width=512, height=512, num_inference_steps=50,
+              controlnet_conditioning_scale = 0.5).images
 imageio.mimsave("video-1.mp4", result, fps=4)
 
