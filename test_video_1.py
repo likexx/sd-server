@@ -84,8 +84,13 @@ latents = torch.randn((1, 4, 32, 32), device="cuda", dtype=torch.float16).repeat
 prompt = '''
 1 girl, an ancient chinese girl in Song dynasty is crunching on the bed and raising her ass high. view from aside, long shot. The character has beautiful face, round eyes, and long hair. She is screaming. She is wearing white classic chinese dress, half naked, large breast, legs naked and vagina exposed, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
 '''
+neg_prompt = '''
+(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed
+'''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, image=edges, latents=latents, width=256, height=256, num_inference_steps=200).images
+result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
+              negative_prompt=neg_prompt,
+              image=edges, latents=latents, width=256, height=256, num_inference_steps=200).images
 imageio.mimsave("video-1.mp4", result, fps=8)
 
