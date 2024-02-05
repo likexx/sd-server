@@ -45,7 +45,7 @@ edges = []
 for i in range(1, 9):
     img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
-    img = img.resize((256, 256))
+    img = img.resize((512, 512))
     edges.append(img)
     # img.save("./input/pose_{}.png".format(j), 'PNG')
     # data = np.array(img)
@@ -59,7 +59,7 @@ for i in range(1, 9):
     # j+=1
     # if j > 10:
     #     break
-edges = edges + edges[::-1]
+# edges = edges + edges[::-1]
 # edges = edges[:12]
 
 
@@ -79,7 +79,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 
 # fix latents for all frames
 # 32 for 256x256. should be 64 for size 512x512
-latents = torch.randn((1, 4, 32, 32), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
+latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
 prompt = '''
 1 girl, an ancient chinese girl in Song dynasty is crunching on the bed and raising her ass high. view from aside, long shot. The character has beautiful face, round eyes, and long hair. She is screaming. She is wearing white classic chinese dress, half naked, large breast, legs naked and vagina exposed, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind.beautiful face, face details, master piece, detailed, vivid, colorful, masterpiece, high quality
@@ -95,7 +95,7 @@ generator = torch.Generator('cuda').manual_seed(12345)
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=256, height=256, num_inference_steps=50,
+              image=edges, latents=latents, width=512, height=512, num_inference_steps=50,
               generator = generator,
               controlnet_conditioning_scale = 0.6).images
 imageio.mimsave("video-1.mp4", result, fps=8)
