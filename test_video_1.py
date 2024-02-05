@@ -26,7 +26,8 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 # pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 edges = []
-
+size = 256
+FPS = 5
 # i = 1
 # j = 0
 # for img in pose_images:
@@ -42,10 +43,10 @@ edges = []
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(1, 9):
-    img = Image.open('../hed/{}.png'.format(i))
+for i in range(1, 20):
+    img = Image.open('../hed/hed_{}.png'.format(i))
     print(img.size)
-    img = img.resize((512, 512))
+    img = img.resize((size, size))
     edges.append(img)
     # img.save("./input/pose_{}.png".format(j), 'PNG')
     # data = np.array(img)
@@ -82,7 +83,7 @@ pipe.controlnet.set_attn_processor(CrossFrameAttnProcessor(batch_size=2))
 
 # fix latents for all frames
 # 32 for 256x256. should be 64 for size 512x512
-latents = torch.randn((1, 4, 64, 64), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
+latents = torch.randn((1, 4, 32 * (size//256), 32*(size//256)), device="cuda", dtype=torch.float16).repeat(len(edges), 1, 1, 1)
 
 prompt = '''
 1 girl, an ancient chinese girl in Song dynasty is crunching on the bed and raising her ass high. view from aside, long shot. The character has beautiful face, round eyes, and long hair. She is screaming. She is wearing white classic chinese dress, half naked, large breast, legs naked and vagina exposed, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind.beautiful face, face details, master piece, detailed, vivid, colorful, masterpiece, high quality
@@ -98,8 +99,8 @@ generator = torch.Generator('cuda').manual_seed(seed)
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=512, height=512, num_inference_steps=100,
+              image=edges, latents=latents, width=size, height=size, num_inference_steps=50,
               generator = generator,
               controlnet_conditioning_scale = controlnet_scale).images
-imageio.mimsave("video-1.mp4", result, fps=4)
+imageio.mimsave("video-1.mp4", result, fps=FPS)
 
