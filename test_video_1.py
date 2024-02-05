@@ -67,6 +67,7 @@ for i in range(1, 9):
 # model_id = "runwayml/stable-diffusion-v1-5"
 model_name = sys.argv[1]
 controlnet_scale = float(sys.argv[2])
+seed = int(sys.argv[3])
 print("using model: " +model_name)
 print("controlnet scale: {}".format(controlnet_scale))
 model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
@@ -91,7 +92,7 @@ neg_prompt = '''
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-generator = torch.Generator('cuda').manual_seed(0)
+generator = torch.Generator('cuda').manual_seed(seed)
 
 # negative_prompt_embeds
 
