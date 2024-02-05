@@ -89,13 +89,13 @@ neg_prompt = '''
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
-generator = torch.Generator('cuda').manual_seed(0)
+generator = torch.Generator('cuda').manual_seed(99)
 
 # negative_prompt_embeds
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=512, height=512, num_inference_steps=50,
+              image=edges, latents=latents, width=512, height=512, num_inference_steps=100,
               generator = generator,
               controlnet_conditioning_scale = 0.5).images
 imageio.mimsave("video-1.mp4", result, fps=8)
