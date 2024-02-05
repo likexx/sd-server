@@ -90,7 +90,7 @@ neg_prompt = '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt] * len(edges))
 
-negative_prompt_embeds
+# negative_prompt_embeds
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
