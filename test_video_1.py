@@ -43,7 +43,7 @@ FPS = 4
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(5, 16):
+for i in range(10, 22):
     img = Image.open('../hed/hed_{}.png'.format(i))
     print(img.size)
     img = img.resize((size, size))
