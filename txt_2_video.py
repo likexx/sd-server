@@ -31,7 +31,7 @@ seed = 0
 video_length = 24  #24 ÷ 4fps = 6 seconds
 chunk_size = 8
 prompt = '''
-1 girl, single frame. one girl is crunching on the bed and moving her ass. she is being fucked, moving her waist up and down. view from aside, long shot. The character is all naked, hands on the bed, raising her ass high, kneeing on the bed. The character has slim waist, beautiful legs,long black hair. Her legs are slightly open. She is being fucked from behind. master piece, detailed, vivid, colorful, masterpiece, high quality
+one girl is crunching on the bed and raising her ass upwards, being fucked, kneeing on bed, hands on bed, face downward, view from aside, long shot, master piece, high quality, vivid color, masterpiece, details
 '''
 compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
 weighted_prompt = compel([prompt])
