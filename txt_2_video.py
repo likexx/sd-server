@@ -37,8 +37,8 @@ one girl is crunching on the bed and raising her ass upwards, being fucked, knee
 one girl is crunching on the bed and raising her ass downwards, yelling, being fucked, kneeing on bed, hands on bed, face upward, view from side, long shot, master piece, high quality, vivid color, masterpiece, details
 '''
 ]
-compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
-weighted_prompt = compel([prompt])
+# compel = Compel(tokenizer=pipe.tokenizer, text_encoder=pipe.text_encoder)
+# weighted_prompt = compel([prompt])
 # compel = Compel(tokenizer=[pipe.tokenizer, pipe.tokenizer_2] , 
 #                 text_encoder=[pipe.text_encoder, pipe.text_encoder_2], 
 #                 returned_embeddings_type=ReturnedEmbeddingsType.PENULTIMATE_HIDDEN_STATES_NON_NORMALIZED, 
@@ -57,8 +57,9 @@ for i in range(len(chunk_ids)):
     frame_ids = [0] + list(range(ch_start, ch_end))
     # Fix the seed for the temporal consistency
     generator.manual_seed(seed)
+    promp = prompt[i%2]
     output = pipe(
-                  prompt = prompt[i%2],
+                  prompt = promp,
                   video_length=len(frame_ids), 
                   generator=generator, width=256, height=256, 
                   motion_field_strength_x = 0,
