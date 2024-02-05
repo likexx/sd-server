@@ -9,6 +9,7 @@ from diffusers.pipelines.stable_diffusion import safety_checker
 import cv2
 from compel import Compel, ReturnedEmbeddingsType
 import sys
+import argparse
 
 def remove_nsfw_check(self, clip_input, images) :
     return images, [False for i in images]
@@ -26,8 +27,25 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 # pose_images = [Image.fromarray(reader.get_data(i)) for i in range(frame_count)]
 
 edges = []
-size = 512
-FPS = 4
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--size', type=int, default=512)
+parser.add_argument('--fps', type=int, default=8)
+parser.add_argument('--model', type=str, default='anything')
+parser.add_argument('--controlnet_scale', type=float, default=0.5)
+parser.add_argument('--seed', type=int, default=0)
+parser.add_argument('--steps', type=int, default=50)
+
+args = parser.parse_args()
+
+size = args.size
+FPS = args.fps
+model_name = args.model
+controlnet_scale = args.controlnet_scale
+seed = args.seed
+steps = args.steps
+print("using model: {}, controlnet scale: {}, fps: {}, seed: {}, size: {}, steps: {}".format(model_name, controlnet_scale, FPS, seed, size, steps))
+
 # i = 1
 # j = 0
 # for img in pose_images:
@@ -66,11 +84,6 @@ for i in range(10, 22):
 
 
 # model_id = "runwayml/stable-diffusion-v1-5"
-model_name = sys.argv[1]
-controlnet_scale = float(sys.argv[2])
-seed = int(sys.argv[3])
-print("using model: " +model_name)
-print("controlnet scale: {}".format(controlnet_scale))
 model_id = "/home/likezhang/models/{}.safetensors".format(model_name)
 controlnet = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-hed", torch_dtype=torch.float16)
 pipe = StableDiffusionControlNetPipeline.from_single_file(
@@ -102,7 +115,7 @@ generator = torch.Generator('cuda').manual_seed(seed)
 
 result = pipe(prompt_embeds=weighted_prompt, pooled_prompt_embeds = None, 
               negative_prompt=[neg_prompt]*len(edges),
-              image=edges, latents=latents, width=size, height=size, num_inference_steps=100,
+              image=edges, latents=latents, width=size, height=size, num_inference_steps=steps,
               generator = generator,
               controlnet_conditioning_scale = controlnet_scale).images
 imageio.mimsave("video-1.mp4", result, fps=FPS)
