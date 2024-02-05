@@ -27,7 +27,7 @@ safety_checker.StableDiffusionSafetyChecker.forward = remove_nsfw_check
 
 edges = []
 size = 256
-FPS = 5
+FPS = 4
 # i = 1
 # j = 0
 # for img in pose_images:
@@ -43,8 +43,8 @@ FPS = 5
 #     # edges.append(edge)
 #     i+=1    
 
-for i in range(1, 20):
-    img = Image.open('../hed/hed_{}.png'.format(i))
+for i in range(1, 9):
+    img = Image.open('../hed/{}.png'.format(i))
     print(img.size)
     img = img.resize((size, size))
     edges.append(img)
