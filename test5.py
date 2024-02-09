@@ -9,6 +9,8 @@ likezhang, likezhang is sitting on the chair in the president room in the White 
     steps=60,
     numImages=4,
     seed=12345,
+    imageWidth=1024,
+    imageHeight=1024,
     deviceType='cuda')
 # params.image = img_util.convert_image_to_base64('./input/p16.png')
 
