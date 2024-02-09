@@ -1,21 +1,24 @@
-from diffusers import AutoPipelineForText2Image
-import torch
+import aigc
+import img_util
 
-pipeline = AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to("mps")
+params = aigc.AigcParam(
+    prompt= '''
+likezhang is standing on the ground, wearing jeans and t-shirt, waving his hands for hello
+''',
+    style='likezhang', 
+    steps=100,
+    numImages=4,
+    seed=0,
+    deviceType='cuda')
+# params.image = img_util.convert_image_to_base64('./input/p16.png')
 
-NEGATIVE_PROMPT="(worst quality, low quality, normal quality:1.4), lowres, bad anatomy, ((bad hands)), text, error, missing fingers, extra digit, fewer digits,head out of frame, cropped, letterboxed, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, censored, letterbox, blurry, monochrome, fused clothes, nail polish, boring, extra legs, fused legs, missing legs, missing arms, extra arms, fused arms, missing limbs, mutated limbs, dead eyes, empty eyes, 2girls, multiple girls, 1boy, 2boys, multiple boys, multiple views, jpeg artifacts, text, signature, watermark, artist name, logo, low res background, low quality background, missing background, white background,deformed"
+workflow = aigc.AigcWorkflow(params)
 
-pipeline.load_lora_weights("/Users/likezhang/projects/models/likezhang.safetensors")
-prompt = "likezhang is looking at you. likezhang is 35 years old. {likezhang},front face, portrait, close up, best quality, masterpiece, realistic,masterpiece,vivid,realistic,photorealistic"
-images = pipeline(
-            prompt = prompt,
-            negative_prompt = NEGATIVE_PROMPT,
-            num_images_per_prompt=4,
-            num_inference_steps=100                
-            ).images
-
-i = 0
+images = workflow.generate()
+i=33001
 for img in images:
-    img.save("test_{}.png".format(i))
+    imgBase64Data = img['base64_data']
+    processedImage = img_util.add_watermark_to_base64(imgBase64Data, 'created by comicx.ai')
+    d = img_util.image_to_base64(processedImage)    
+    img_util.saveBase64toPNG(d, './output/likezhang_{}.png'.format(i))
     i+=1
-

@@ -122,8 +122,8 @@ class AigcWorkflow:
 
         if lora:
             if lora.endswith('.safetensors'):
-                print("load lora weights")
-                pipeline.load_lora_weights(".", weight_name=lora)
+                print("load lora weights: {}".format(lora))
+                pipeline.load_lora_weights(lora)
             else:
                 pipeline.unet.load_attn_procs(lora)
 
