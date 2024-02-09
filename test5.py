@@ -20,5 +20,5 @@ for img in images:
     imgBase64Data = img['base64_data']
     processedImage = img_util.add_watermark_to_base64(imgBase64Data, 'created by comicx.ai')
     d = img_util.image_to_base64(processedImage)    
-    img_util.saveBase64toPNG(d, './output/likezhang_{}.png'.format(i))
+    img_util.saveBase64toPNG(d, '/home/likezhang/output/likezhang_{}.png'.format(i))
     i+=1
