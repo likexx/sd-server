@@ -3,11 +3,11 @@ import img_util
 
 params = aigc.AigcParam(
     prompt= '''
-likezhang is sitting behind a table in the president room in the White House in US,  {likezhang}, backgrund is a wall with US national flag, close up shot, view from front, face details, background details
+likezhang is sitting behind a table in the president room in the White House in US. likezhang is looking at you. {likezhang}, close up shot, view from front, face details, background details
 ''',
     style='likezhang', 
     steps=60,
-    numImages=4,
+    numImages=8,
     seed=0,
     deviceType='cuda')
 # params.image = img_util.convert_image_to_base64('./input/p16.png')
