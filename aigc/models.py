@@ -43,5 +43,5 @@ MODELS = {
     "cartoon2-nsfw": { "model": hardcoreHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
 
     "anim-porn": { "model": grapfruitHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
-    "likezhang": { "model": stableDiffustion1_5, "lora": likezhangPath, "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION }
+    "likezhang": { "model": stableDiffustion1_5, "lora": likezhangPath, "pipeline_type": "auto", "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION }
 }
