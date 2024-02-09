@@ -3,7 +3,7 @@ import img_util
 
 params = aigc.AigcParam(
     prompt= '''
-likezhang is sitting behind a table in the president room in the White House in US,  US national flag on the wall, {likezhang}, likezhang is wearing a fine white suits, close up, view from front, face details, background details,
+likezhang is sitting behind a table in the president room in the White House in US,  {likezhang}, backgrund is a wall with US national flag, close up shot, view from front, face details, background details
 ''',
     style='likezhang', 
     steps=60,
