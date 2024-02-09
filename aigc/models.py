@@ -6,7 +6,7 @@ stableDiffuxionTurbo = "stabilityai/sdxl-turbo"
 hardcoreAsianPornPath = "/Users/likezhang/projects/models/hardcoreAsianPorn_v20.safetensors"
 hardcoreHentaiPath = "/Users/likezhang/projects/models/hardcoreHentai12_v12BakedVAE.safetensors"
 grapfruitHentaiPath = "/Users/likezhang/projects/models/grapefruitHentaiModel_grapefruitv41.safetensors"
-likezhangPath = "/home/likezhang/output/pytorch_lora_weights.safetensors"
+likezhangPath = "/home/likezhang/output/likezhang.safetensors"
 
 DEFAULT_PROMPT_SUGGESTION = [
     'best quality',
