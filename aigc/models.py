@@ -6,6 +6,7 @@ stableDiffuxionTurbo = "stabilityai/sdxl-turbo"
 hardcoreAsianPornPath = "/Users/likezhang/projects/models/hardcoreAsianPorn_v20.safetensors"
 hardcoreHentaiPath = "/Users/likezhang/projects/models/hardcoreHentai12_v12BakedVAE.safetensors"
 grapfruitHentaiPath = "/Users/likezhang/projects/models/grapefruitHentaiModel_grapefruitv41.safetensors"
+likezhangPath = "/home/likezhang/output/pytorch_lora_weights.safetensors"
 
 DEFAULT_PROMPT_SUGGESTION = [
     'best quality',
@@ -41,5 +42,6 @@ MODELS = {
     "cartoon2": { "model": hardcoreHentaiPath, "nsfw": False,  "prompts": CARTOON_PROMPT_SUGGESTION },
     "cartoon2-nsfw": { "model": hardcoreHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
 
-    "anim-porn": { "model": grapfruitHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION }
+    "anim-porn": { "model": grapfruitHentaiPath, "nsfw": False, "prompts": CARTOON_PROMPT_SUGGESTION },
+    "likezhang": { "model": likezhangPath, "nsfw": False, "prompts": DEFAULT_PROMPT_SUGGESTION }
 }
