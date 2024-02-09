@@ -8,7 +8,7 @@ likezhang is sitting behind a table in the president room in the White House in 
     style='likezhang', 
     steps=60,
     numImages=4,
-    seed=12345,
+    seed=0,
     deviceType='cuda')
 # params.image = img_util.convert_image_to_base64('./input/p16.png')
 
