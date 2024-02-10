@@ -147,6 +147,9 @@ class AigcWorkflow:
         return None
 
     def __createWeightedPrompt(self, compel_config_id, pipeline, prompt):
+        if not self.useWeightedPrompt:
+            return [prompt, None]
+
         if compel_config_id != '2' :
             compel = Compel(tokenizer=pipeline.tokenizer, text_encoder=pipeline.text_encoder)
             return [compel([prompt]), None]

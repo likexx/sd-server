@@ -9,7 +9,8 @@ likezhang is sitting behind a table in the president room in the White House in 
     steps=60,
     numImages=8,
     seed=0,
-    deviceType='cuda')
+    deviceType='cuda',
+    weightedPrompt=False)
 # params.image = img_util.convert_image_to_base64('./input/p16.png')
 
 workflow = aigc.AigcWorkflow(params)

@@ -16,7 +16,8 @@ class AigcParam:
             imageWidth = IMG_WIDTH,
             style = "cartoon",
             seed = None,
-            deviceType = "cuda"
+            deviceType = "cuda",
+            weightedPrompt = True
     ):
         self.prompt = prompt
         self.negPrompt = negPrompt
@@ -28,4 +29,5 @@ class AigcParam:
         self.style = style
         self.seed = seed
         self.deviceType = deviceType
+        self.useWeightedPrompt = weightedPrompt
         
