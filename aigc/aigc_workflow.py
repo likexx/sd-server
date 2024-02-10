@@ -27,6 +27,7 @@ class AigcWorkflow:
         self.style = params.style
         self.seed = params.seed
         self.deviceType = params.deviceType
+        self.useWeightedPrompt = params.useWeightedPrompt
 
     def __loadFromExistingModels(self, model, requireSafetyChecker):
         if not requireSafetyChecker:
@@ -147,9 +148,6 @@ class AigcWorkflow:
         return None
 
     def __createWeightedPrompt(self, compel_config_id, pipeline, prompt):
-        if not self.useWeightedPrompt:
-            return [prompt, None]
-
         if compel_config_id != '2' :
             compel = Compel(tokenizer=pipeline.tokenizer, text_encoder=pipeline.text_encoder)
             return [compel([prompt]), None]
@@ -185,29 +183,51 @@ class AigcWorkflow:
 
         if not self.image or not img2imgPipeline:
             print("generate with txt2img")
+            if self.useWeightedPrompt:
+                images = txt2imgPipeline(
+                                    prompt_embeds = prompt_embeds,
+                                    pooled_prompt_embeds = pooled,
+                                    negative_prompt=self.negPrompt,
+                                    num_images_per_prompt=self.numImages,
+                                    num_inference_steps=self.steps,
+                                    height=self.imageHeight,
+                                    width=self.imageWidth,
+                                    generator=generator).images
+            else:
+                images = txt2imgPipeline(
+                                    prompt = enhancedPrompt,
+                                    negative_prompt=self.negPrompt,
+                                    num_images_per_prompt=self.numImages,
+                                    num_inference_steps=self.steps,
+                                    height=self.imageHeight,
+                                    width=self.imageWidth,
+                                    generator=generator).images
 
-            images = txt2imgPipeline(
-                                prompt_embeds = prompt_embeds,
-                                pooled_prompt_embeds = pooled,
-                                negative_prompt=self.negPrompt,
-                                num_images_per_prompt=self.numImages,
-                                num_inference_steps=self.steps,
-                                height=self.imageHeight,
-                                width=self.imageWidth,
-                                generator=generator).images
+            
         else:
             print("generate with img2img")
             init_image = self.__base64ToRGB(self.image)
             init_image = init_image.resize((self.imageWidth, self.imageHeight))
-            images = img2imgPipeline(
-                                    prompt_embeds = prompt_embeds,
-                                    pooled_prompt_embeds = pooled,
-                                    image=init_image,
-                                    negative_prompt=self.negPrompt,
-                                    num_images_per_prompt=self.numImages,
-                                    num_inference_steps=self.steps,
-                                    generator = generator
-                                    ).images
+            if self.useWeightedPrompt:
+                images = img2imgPipeline(
+                                        prompt_embeds = prompt_embeds,
+                                        pooled_prompt_embeds = pooled,
+                                        image=init_image,
+                                        negative_prompt=self.negPrompt,
+                                        num_images_per_prompt=self.numImages,
+                                        num_inference_steps=self.steps,
+                                        generator = generator
+                                        ).images
+            else:
+                images = img2imgPipeline(
+                                        prompt = enhancedPrompt,
+                                        image=init_image,
+                                        negative_prompt=self.negPrompt,
+                                        num_images_per_prompt=self.numImages,
+                                        num_inference_steps=self.steps,
+                                        generator = generator
+                                        ).images
+
         for img in images:
             buffered = BytesIO()
             img.save(buffered, format="JPEG")
