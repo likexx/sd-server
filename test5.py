@@ -29,7 +29,7 @@ import torch
 
 pipeline = AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to("cuda")
 pipeline.load_lora_weights("/home/likezhang/output", weight_name="likezhang.safetensors")
-images = pipeline(prompt="likezhang is sitting behind a table in the president room in the White House in US, {likezhang}, medium shot, face details, high quality", num_images_per_prompt=4).images
+images = pipeline(prompt="likezhang is sitting behind a table in the president room in the White House in US, {likezhang}, medium shot, view from front, 8k", num_images_per_prompt=4).images
 i=1
 for img in images:
     img.save("/home/likezhang/output/likezhang_{}.png".format(i))
