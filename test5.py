@@ -1,36 +1,48 @@
-import aigc
-import img_util
+# import aigc
+# import img_util
 
-params = aigc.AigcParam(
-    prompt= '''
-likezhang is sitting on a chair and looking forward. {{likezhang}}, close up shot, view from front, face details
-''',
-    style='likezhang', 
-    steps=50,
-    numImages=8,
-    seed=0,
-    deviceType='cuda',
-    weightedPrompt=True)
-# params.image = img_util.convert_image_to_base64('./input/p16.png')
+# params = aigc.AigcParam(
+#     prompt= '''
+# likezhang is sitting on a chair and looking forward. {{likezhang}}, close up shot, view from front, face details
+# ''',
+#     style='likezhang', 
+#     steps=50,
+#     numImages=8,
+#     seed=0,
+#     deviceType='cuda',
+#     weightedPrompt=True)
+# # params.image = img_util.convert_image_to_base64('./input/p16.png')
 
-workflow = aigc.AigcWorkflow(params)
+# workflow = aigc.AigcWorkflow(params)
 
-images = workflow.generate()
-i=1
-for img in images:
-    imgBase64Data = img['base64_data']
-    processedImage = img_util.add_watermark_to_base64(imgBase64Data, 'created by comicx.ai')
-    d = img_util.image_to_base64(processedImage)    
-    img_util.saveBase64toPNG(d, '/home/likezhang/output/likezhang_{}.png'.format(i))
-    i+=1
+# images = workflow.generate()
+# i=1
+# for img in images:
+#     imgBase64Data = img['base64_data']
+#     processedImage = img_util.add_watermark_to_base64(imgBase64Data, 'created by comicx.ai')
+#     d = img_util.image_to_base64(processedImage)    
+#     img_util.saveBase64toPNG(d, '/home/likezhang/output/likezhang_{}.png'.format(i))
+#     i+=1
 
 # from diffusers import AutoPipelineForText2Image
 # import torch
 
 # pipeline = AutoPipelineForText2Image.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16).to("cuda")
+
 # pipeline.load_lora_weights("/home/likezhang/output", weight_name="likezhang.safetensors")
 # images = pipeline(prompt="likezhang is sitting on a chair and looking forward, {likezhang}, portrait, close up, view from front", num_images_per_prompt=4).images
 # i=1
 # for img in images:
 #     img.save("/home/likezhang/output/likezhang_{}.png".format(i))
 #     i+=1
+
+from diffusers import AutoPipelineForText2Image
+import torch
+
+pipeline = AutoPipelineForText2Image.from_pretrained("/home/likezhang/output/checkpoint-6000", torch_dtype=torch.float16).to("cuda")
+
+images = pipeline(prompt="likezhang and messi are sitting and looking forward, portrait, close up, view from front", num_images_per_prompt=4).images
+i=1
+for img in images:
+    img.save("/home/likezhang/output/all_{}.png".format(i))
+    i+=1
